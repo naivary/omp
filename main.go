@@ -16,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/naivary/omp/logger"
+	"github.com/naivary/omp/postgres"
 )
 
 func main() {
@@ -40,7 +41,7 @@ func run(
 	logger := logger.New(&slog.HandlerOptions{
 		AddSource: true,
 	})
-	pg, err := connectToPostgresDB(ctx, cfg.psqlHost, cfg.psqlPort, cfg.psqlUsername, cfg.psqlPassword, cfg.psqlDatabaseName)
+	pg, err := postgres.Connect(ctx, cfg.pgHost, cfg.pgPort, cfg.pgUsername, cfg.pgPassword, cfg.pgDatabaseName)
 	if err != nil {
 		return err
 	}

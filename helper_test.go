@@ -50,12 +50,16 @@ func NewTestServer(
 	args = slices.Concat(args, []string{
 		"omp",
 		"-port", strconv.Itoa(port),
-		"-psql.username", "postgres",
-		"-psql.password", "postgres",
-		"-psql.database", "omp",
+		"-pg.username", "postgres",
+		"-pg.password", "postgres",
+		"-pg.database", "omp",
 	})
-	go run(ctx, args, getenv, stdin, stdout, stderr)
-
+	go func() {
+		err := run(ctx, args, getenv, stdin, stdout, stderr)
+		if err != nil {
+			panic(err)
+		}
+	}()
 	// wait until ready
 	readyzEndpoint, err := url.JoinPath(baseURL, "readyz")
 	if err != nil {
