@@ -11,12 +11,8 @@ indent_style = tab
 
 [*.md]
 indent_style = tab
-trim_trailing_whitespace = false
+# trim_trailing_whitespace = false
 
 [*.{yml,yaml,json}]
 indent_style = space
 indent_size = 2
-
-[*.{js,jsx,ts,tsx,css,less,sass,scss,vue,py}]
-indent_style = space
-indent_size = 4
