@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/naivary/omp/logger"
 )
 
@@ -35,20 +37,20 @@ func run(
 	if err != nil {
 		return err
 	}
-	// if problems := cfg.Validate(ctx); len(problems) != 0 {
-	// 	return fmt.Errorf("invalid config: %v\n", problems)
-	// }
 	logger := logger.New(&slog.HandlerOptions{
 		AddSource: true,
 	})
-
+	pg, err := connectToPostgresDB(ctx, cfg.psqlHost, cfg.psqlPort, cfg.psqlUsername, cfg.psqlPassword, cfg.psqlDatabaseName)
+	if err != nil {
+		return err
+	}
 	// start the server with graceful handling
 	interuptCtx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 	host, port := cfg.host, strconv.Itoa(cfg.port)
 	srv := &http.Server{
 		Addr:    net.JoinHostPort(host, port),
-		Handler: newHandler(),
+		Handler: newHandler(pg),
 		BaseContext: func(net.Listener) context.Context {
 			return interuptCtx
 		},
@@ -71,8 +73,8 @@ func run(
 	return srv.Shutdown(shutdownCtx)
 }
 
-func newHandler() http.Handler {
+func newHandler(pg *pgx.Conn) http.Handler {
 	mux := http.NewServeMux()
-	addRoutes(mux)
+	addRoutes(mux, pg)
 	return mux
 }

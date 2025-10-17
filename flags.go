@@ -1,9 +1,7 @@
 package main
 
 import (
-	"context"
 	"flag"
-	"fmt"
 )
 
 type config struct {
@@ -29,18 +27,6 @@ func parseFlags(args []string) (*config, error) {
 	fs.IntVar(&cfg.psqlPort, "psql.port", 5432, "port of postgresql server")
 	fs.StringVar(&cfg.psqlUsername, "psql.username", "", "username of postgresql server to use for authentication")
 	fs.StringVar(&cfg.psqlPassword, "psql.password", "", "password of postregsql server to use for authentication")
-	fs.StringVar(&cfg.psqlDatabaseName, "psql.db.name", "omp", "database name")
-	fmt.Println(args)
+	fs.StringVar(&cfg.psqlDatabaseName, "psql.database", "omp", "database name")
 	return &cfg, fs.Parse(args[1:])
-}
-
-func (c *config) Validate(ctx context.Context) map[string]string {
-	problems := make(map[string]string)
-	if c.psqlUsername == "" {
-		problems["psql username empty"] = "psql username cannot be empty"
-	}
-	if c.psqlPassword == "" {
-		problems["psql password empty"] = "psql password cannot be empty"
-	}
-	return problems
 }

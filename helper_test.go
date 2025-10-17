@@ -47,8 +47,13 @@ func NewTestServer(
 		return "", nil
 	}
 	baseURL := fmt.Sprintf("http://127.0.0.1:%d", port)
-	args = slices.Concat(args, []string{"omp", "-port", strconv.Itoa(port)})
-	fmt.Println(args)
+	args = slices.Concat(args, []string{
+		"omp",
+		"-port", strconv.Itoa(port),
+		"-psql.username", "postgres",
+		"-psql.password", "postgres",
+		"-psql.database", "omp",
+	})
 	go run(ctx, args, getenv, stdin, stdout, stderr)
 
 	// wait until ready
