@@ -15,9 +15,8 @@ func CreateMetricDefinition(pg *pgx.Conn) *Endpoint {
 		if err != nil {
 			return err
 		}
-		def := metricv1.Definition{}
 		fmt.Println(data)
-		return encode(w, r, http.StatusCreated, def)
+		return encode[any](w, r, http.StatusCreated, nil)
 	})
 
 	return &Endpoint{
