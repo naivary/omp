@@ -22,7 +22,7 @@ func TestLivez(t *testing.T) {
 	ctx, cancel := context.WithCancel(ctx)
 	t.Cleanup(cancel)
 
-	baseURL, err := NewTestServer(ctx, os.Args, os.Getenv, os.Stdin, os.Stdout, os.Stderr)
+	baseURL, err := NewTestServer(ctx, nil, os.Getenv, os.Stdin, os.Stdout, os.Stderr)
 	if err != nil {
 		t.Errorf("new test sever: %s", err)
 		t.FailNow()

@@ -35,11 +35,14 @@ func run(
 	if err != nil {
 		return err
 	}
+	// if problems := cfg.Validate(ctx); len(problems) != 0 {
+	// 	return fmt.Errorf("invalid config: %v\n", problems)
+	// }
 	logger := logger.New(&slog.HandlerOptions{
 		AddSource: true,
 	})
 
-	// start he server with graceful handling
+	// start the server with graceful handling
 	interuptCtx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 	host, port := cfg.host, strconv.Itoa(cfg.port)

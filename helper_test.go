@@ -10,6 +10,8 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"slices"
+	"strconv"
 	"time"
 
 	"github.com/naivary/omp/probe"
@@ -45,17 +47,9 @@ func NewTestServer(
 		return "", nil
 	}
 	baseURL := fmt.Sprintf("http://127.0.0.1:%d", port)
-	env := func(key string) string {
-		switch key {
-		case "HOST":
-			return "127.0.0.1"
-		case "PORT":
-			return fmt.Sprintf("%d", port)
-		default:
-			return getenv(key)
-		}
-	}
-	go run(ctx, args, env, stdin, stdout, stderr)
+	args = slices.Concat(args, []string{"omp", "-port", strconv.Itoa(port)})
+	fmt.Println(args)
+	go run(ctx, args, getenv, stdin, stdout, stderr)
 
 	// wait until ready
 	readyzEndpoint, err := url.JoinPath(baseURL, "readyz")
