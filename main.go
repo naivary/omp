@@ -5,11 +5,15 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
+
+	"github.com/naivary/omp/logger"
 )
 
 func main() {
@@ -27,17 +31,18 @@ func run(
 	stdin io.Reader,
 	stdout, stderr io.Writer,
 ) error {
-	// initialize dependencies
-	logger := newLogger(nil)
-	err := GenOpenAPISpecs(nil)
+	cfg, err := parseFlags(args)
 	if err != nil {
 		return err
 	}
+	logger := logger.New(&slog.HandlerOptions{
+		AddSource: true,
+	})
 
 	// start he server with graceful handling
 	interuptCtx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
-	host, port := getenv("HOST"), getenv("PORT")
+	host, port := cfg.host, strconv.Itoa(cfg.port)
 	srv := &http.Server{
 		Addr:    net.JoinHostPort(host, port),
 		Handler: newHandler(),
