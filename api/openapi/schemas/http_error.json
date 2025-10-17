@@ -1,0 +1,1 @@
+{"$id":"https://raw.githubusercontent.com/naivary/omp/refs/heads/main/api/openapi/schemas/http_error.json","$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","title":"http error response","properties":{"msg":{"type":"string"},"requestId":{"type":"string"},"spanId":{"type":"string"},"statusCode":{"type":"integer"}}}

@@ -1,0 +1,4 @@
+gens:
+  openapi:
+    schema:
+      idBaseURL: "https://raw.githubusercontent.com/naivary/omp/refs/heads/main/api/openapi/schemas"
