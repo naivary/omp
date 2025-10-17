@@ -10,15 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"time"
-
-	"github.com/naivary/omp/openapi"
 )
-
-func openAPISpec() *openapi.OpenAPI {
-	const openAPIVersion = "3.2.0"
-	spec := openapi.New(openAPIVersion, "cnapi", "info@cnapi.com", openapi.MIT)
-	return spec
-}
 
 func main() {
 	ctx := context.Background()
@@ -37,7 +29,7 @@ func run(
 ) error {
 	// initialize dependencies
 	logger := newLogger(nil)
-	err := GenOpenAPISpecs(openAPISpec())
+	err := GenOpenAPISpecs(nil)
 	if err != nil {
 		return err
 	}
