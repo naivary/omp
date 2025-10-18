@@ -45,6 +45,7 @@ func run(
 	if err != nil {
 		return err
 	}
+
 	// start the server with graceful handling
 	interuptCtx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()

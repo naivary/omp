@@ -16,14 +16,10 @@ func Connect(ctx context.Context, host string, port int, username, password, dat
 		return nil, errors.New("pg password not defined")
 	}
 	connString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s", username, password, host, port, database)
-	conn, err := pgx.Connect(ctx, connString)
-	if err != nil {
-		return nil, err
-	}
-	return conn, provisionPostgresDB(ctx, conn)
+	return pgx.Connect(ctx, connString)
 }
 
-func provisionPostgresDB(ctx context.Context, conn *pgx.Conn) error {
+func provision(ctx context.Context, conn *pgx.Conn) error {
 	_, err := conn.Exec(ctx, `
 	CREATE OR REPLACE FUNCTION pseudo_encrypt(value bigint) returns bigint AS $$
 	DECLARE
@@ -76,6 +72,7 @@ func provisionPostgresDB(ctx context.Context, conn *pgx.Conn) error {
 	CREATE TABLE IF NOT EXISTS metric_type(
 		name text PRIMARY KEY
 	);
+
 	INSERT INTO metric_type VALUES('Counter');
 	INSERT INTO metric_type VALUES('Gauge');
 	CREATE TABLE IF NOT EXISTS metric_defintion(
