@@ -17,7 +17,7 @@ import (
 	"github.com/naivary/omp/probe"
 )
 
-var errProbeFailed = errors.New("probe failed")
+var errReadinessProbeFailed = errors.New("readiness probe failed")
 
 // NewTestServer starts an HTTP server using the provided configuration parameters
 // and ensures that it is fully initialized before accepting incoming connections.
@@ -74,12 +74,14 @@ func NewTestServer(
 		return "", err
 	}
 	if status == probe.Failed {
-		return "", errProbeFailed
+		return "", errReadinessProbeFailed
 	}
 	return baseURL, nil
 }
 
-// freePort returns a port which is probably useable.
+// freePort returns a port which is probably useable. It's only PROBABLY useable
+// because the listener is getting closed and their is a slight chance for
+// another process to aquire that port.
 func freePort() (int, error) {
 	lis, err := net.Listen("tcp", ":0")
 	if err != nil {
