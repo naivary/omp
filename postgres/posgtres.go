@@ -6,6 +6,11 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+)
+
+const (
+	_pgCodeRelationDoesNotExist = "42P01"
 )
 
 func Connect(ctx context.Context, host string, port int, username, password, database string) (*pgx.Conn, error) {
@@ -16,10 +21,35 @@ func Connect(ctx context.Context, host string, port int, username, password, dat
 		return nil, errors.New("pg password not defined")
 	}
 	connString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s", username, password, host, port, database)
-	return pgx.Connect(ctx, connString)
+	conn, err := pgx.Connect(ctx, connString)
+	if err != nil {
+		return nil, err
+	}
+	return conn, provision(ctx, conn)
+}
+
+func aquirePGAdvisoryLock(ctx context.Context, conn *pgx.Conn) error {
+	return nil
+}
+
+func isProvisioned(ctx context.Context, conn *pgx.Conn) bool {
+	_, err := conn.Query(ctx, `SELECT pg_advisory_lock(value) FROM omp_metadata WHERE key = 'isProvisioned' AND value = '0';`)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if !errors.As(err, &pgErr) {
+			return false
+		}
+		if pgErr.Code == _pgCodeRelationDoesNotExist {
+			return false
+		}
+	}
+	return true
 }
 
 func provision(ctx context.Context, conn *pgx.Conn) error {
+	if isProvisioned(ctx, conn) {
+		return nil
+	}
 	_, err := conn.Exec(ctx, `
 	CREATE OR REPLACE FUNCTION pseudo_encrypt(value bigint) returns bigint AS $$
 	DECLARE
