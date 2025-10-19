@@ -8,8 +8,8 @@ import (
 
 func addRoutes(mux *http.ServeMux, pgPool *pgxpool.Pool) {
 	// system
-	mux.Handle("GET /livez", livez())
-	mux.Handle("GET /readyz", readyz())
+	mux.Handle("GET /livez", Livez())
+	mux.Handle("GET /readyz", Readyz())
 	// metrics management
 	mux.Handle("POST /metrics/definition", CreateMetricDefinition(pgPool))
 }

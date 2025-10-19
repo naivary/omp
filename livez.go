@@ -2,7 +2,7 @@ package main
 
 import "net/http"
 
-func livez() http.Handler {
+func Livez() http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
 		if ctx.Err() != nil {
