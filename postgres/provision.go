@@ -83,8 +83,11 @@ func provision(ctx context.Context, pool *pgxpool.Pool) error {
 	if err != nil {
 		return err
 	}
-	statements := []*provisionStatement{provisionStatementV1()}
+	statements := []*provisionStatement{
+		provisionStatementV1(),
+	}
 	for _, stmt := range statements {
+		// skip older version and only apply the newest ones
 		if stmt.version != _schemaVersion {
 			continue
 		}
