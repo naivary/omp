@@ -2,7 +2,7 @@ package postgres
 
 func provisionStatementV1() *provisionStatement {
 	return &provisionStatement{
-	version: 1,
+		version: 1,
 		sql: `
 		CREATE OR REPLACE FUNCTION pseudo_encrypt(value bigint) returns bigint AS $$
 		DECLARE
