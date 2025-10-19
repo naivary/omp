@@ -3,13 +3,13 @@ package main
 import (
 	"net/http"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func addRoutes(mux *http.ServeMux, pg *pgx.Conn) {
+func addRoutes(mux *http.ServeMux, pgPool *pgxpool.Pool) {
 	// system
 	mux.Handle("GET /livez", livez())
 	mux.Handle("GET /readyz", readyz())
 	// metrics management
-	mux.Handle("POST /metrics/definition", CreateMetricDefinition(pg))
+	mux.Handle("POST /metrics/definition", CreateMetricDefinition(pgPool))
 }

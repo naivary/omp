@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/naivary/omp/logger"
 	"github.com/naivary/omp/postgres"
@@ -75,8 +75,8 @@ func run(
 	return srv.Shutdown(shutdownCtx)
 }
 
-func newHandler(pg *pgx.Conn) http.Handler {
+func newHandler(pgPool *pgxpool.Pool) http.Handler {
 	mux := http.NewServeMux()
-	addRoutes(mux, pg)
+	addRoutes(mux, pgPool)
 	return mux
 }
