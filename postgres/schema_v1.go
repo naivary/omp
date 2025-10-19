@@ -24,31 +24,28 @@ func provisionStatementV1() *provisionStatement {
 		 return ((r1 << 16) + l1);
 		END;
 		$$ LANGUAGE plpgsql strict immutable;
-
-
 		CREATE SEQUENCE IF NOT EXISTS id_seq START 1;
+
 		CREATE TABLE IF NOT EXISTS club(
 			id int PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
 			name text,
 			timezone text DEFAULT 'Europe/Berlin'
 		);
 
-		CREATE SEQUENCE IF NOT EXISTS id_seq START 1;
 		CREATE TABLE IF NOT EXISTS team(
 			id int PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
 			club_id int REFERENCES club(id),
 			name text,
 			league text
 		);
-		CREATE SEQUENCE IF NOT EXISTS id_seq START 1;
-		CREATE TYPE scope AS ENUM('Club', 'Team', 'Private');
 
 		CREATE TABLE IF NOT EXISTS metric_type(
 			name text PRIMARY KEY
 		);
-
 		INSERT INTO metric_type VALUES('Counter');
 		INSERT INTO metric_type VALUES('Gauge');
+
+		CREATE TYPE scope AS ENUM('Club', 'Team', 'Private');
 		CREATE TABLE IF NOT EXISTS metric_defintion(
 			id int PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
 			name text,
