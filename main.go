@@ -15,6 +15,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/naivary/omp/keycloak"
 	"github.com/naivary/omp/logger"
 	"github.com/naivary/omp/postgres"
 )
@@ -45,7 +46,11 @@ func run(
 	if err != nil {
 		return err
 	}
-
+	clubMngr, err := keycloak.NewClubManager(ctx, cfg.oidcIssuer, cfg.oidcClubClientID, cfg.oidcClubClientSecret)
+	if err != nil {
+		return err
+	}
+	_ = clubMngr
 	// start the server with graceful handling
 	interuptCtx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
