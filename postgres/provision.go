@@ -68,6 +68,7 @@ func provision(ctx context.Context, pool *pgxpool.Pool) error {
 	if err != nil {
 		return err
 	}
+	defer conn.Release()
 	if isAlreadyProvisioned, err := isSchemaAtCurrentVersion(ctx, conn); err != nil || isAlreadyProvisioned {
 		return err
 	}
