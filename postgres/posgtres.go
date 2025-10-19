@@ -4,12 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// _schemaVersion is the curretn version the schema is at. If any updates are
+// done to the schema this number will be increased by one to automatically
+// update the schema in the database accordingly.
 const _schemaVersion = 1
 
 const (
@@ -42,7 +46,7 @@ func acquireAdvisoryLock(ctx context.Context, tx pgx.Tx, lockFor int) error {
 
 func isProvisioned(ctx context.Context, conn *pgxpool.Conn) (bool, error) {
 	var pgErr *pgconn.PgError
-	var isAlreadyProvisioned string
+	var schemaVerion string
 	rows, err := conn.Query(ctx, `SELECT value FROM omp_metadata WHERE key = 'schema_version'`)
 	if err != nil && errors.As(err, &pgErr) {
 		if pgErr.Code == _pgCodeRelationDoesNotExist {
@@ -52,11 +56,15 @@ func isProvisioned(ctx context.Context, conn *pgxpool.Conn) (bool, error) {
 	defer rows.Close()
 	if !rows.Next() {
 		return true, errors.New(
-			"now row found for key 'isProvisioned'. This error should never occur. If it does then the key might have changed or the name of the table",
+			"now row found for key 'schema_version'. This error should never occur. If it does then the key might have changed or the name of the table",
 		)
 	}
-	err = rows.Scan(&isAlreadyProvisioned)
-	return isAlreadyProvisioned == "true", err
+	err = rows.Scan(&schemaVerion)
+	if err != nil {
+		return true, err
+	}
+	schemaVersionInt, err := strconv.Atoi(schemaVerion)
+	return schemaVersionInt == _schemaVersion, err
 }
 
 func provision(ctx context.Context, pool *pgxpool.Pool) error {
@@ -75,7 +83,11 @@ func provision(ctx context.Context, pool *pgxpool.Pool) error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(ctx, `
+	pseudoTx, err := tx.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = pseudoTx.Exec(ctx, `
 	CREATE OR REPLACE FUNCTION pseudo_encrypt(value bigint) returns bigint AS $$
 	DECLARE
 	l1 int;
@@ -97,11 +109,6 @@ func provision(ctx context.Context, pool *pgxpool.Pool) error {
 	END;
 	$$ LANGUAGE plpgsql strict immutable;
 
-	-- metadata table
-	CREATE TABLE omp_metadata(
-		key text PRIMARY KEY,
-		value text NOT NULL
-	);
 
 	CREATE SEQUENCE IF NOT EXISTS id_seq START 1;
 	CREATE TABLE IF NOT EXISTS club(
@@ -138,9 +145,18 @@ func provision(ctx context.Context, pool *pgxpool.Pool) error {
 		UNIQUE(name, scope, team_id)
 	);
 
-	-- make sure to update the omp_metadata table to not provision again.
-	INSERT INTO omp_metadata VALUES('schema_version', 'true');
+	CREATE TABLE omp_metadata(
+		key text PRIMARY KEY,
+		value text NOT NULL
+	);
 	`)
+	if err != nil {
+		return err
+	}
+	if err := pseudoTx.Commit(ctx); err != nil {
+		return err
+	}
+	_, err = tx.Exec(ctx, `INSERT INTO omp_metadata VALUES('schema_version', $1);`, strconv.Itoa(_schemaVersion))
 	if err != nil {
 		return err
 	}
