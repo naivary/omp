@@ -10,6 +10,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const _schemaVersion = 1
+
 const (
 	_pgCodeRelationDoesNotExist = "42P01"
 )
@@ -41,7 +43,7 @@ func acquireAdvisoryLock(ctx context.Context, tx pgx.Tx, lockFor int) error {
 func isProvisioned(ctx context.Context, conn *pgxpool.Conn) (bool, error) {
 	var pgErr *pgconn.PgError
 	var isAlreadyProvisioned string
-	rows, err := conn.Query(ctx, `SELECT value FROM omp_metadata WHERE key = 'isProvisioned'`)
+	rows, err := conn.Query(ctx, `SELECT value FROM omp_metadata WHERE key = 'schema_version'`)
 	if err != nil && errors.As(err, &pgErr) {
 		if pgErr.Code == _pgCodeRelationDoesNotExist {
 			return false, nil
@@ -137,7 +139,7 @@ func provision(ctx context.Context, pool *pgxpool.Pool) error {
 	);
 
 	-- make sure to update the omp_metadata table to not provision again.
-	INSERT INTO omp_metadata VALUES('isProvisioned', 'true');
+	INSERT INTO omp_metadata VALUES('schema_version', 'true');
 	`)
 	if err != nil {
 		return err
