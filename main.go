@@ -15,7 +15,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/naivary/omp/club"
 	"github.com/naivary/omp/logger"
 	"github.com/naivary/omp/postgres"
 )
@@ -43,10 +42,6 @@ func run(
 		AddSource: true,
 	})
 	pg, err := postgres.Connect(ctx, cfg.pgHost, cfg.pgPort, cfg.pgUsername, cfg.pgPassword, cfg.pgDatabaseName)
-	if err != nil {
-		return err
-	}
-	clubMngr, err := club.NewManager(ctx, cfg.oidcIssuer, cfg.oidcClubClientID, cfg.oidcClubClientSecret)
 	if err != nil {
 		return err
 	}

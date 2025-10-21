@@ -14,17 +14,19 @@ import (
 const (
 	ScopeClub Scope = iota
 	ScopeTeam
-	ScopeTeamPrivate
+	ScopeCoach
+	ScopePlayer
 )
 
 var ErrInvalidScope = errors.New("not a valid Scope")
 
-const _ScopeName = "ClubTeamTeamPrivate"
+const _ScopeName = "ClubTeamCoachPlayer"
 
 var _ScopeMap = map[Scope]string{
-	ScopeClub:        _ScopeName[0:4],
-	ScopeTeam:        _ScopeName[4:8],
-	ScopeTeamPrivate: _ScopeName[8:19],
+	ScopeClub:   _ScopeName[0:4],
+	ScopeTeam:   _ScopeName[4:8],
+	ScopeCoach:  _ScopeName[8:13],
+	ScopePlayer: _ScopeName[13:19],
 }
 
 // String implements the Stringer interface.
@@ -43,9 +45,10 @@ func (x Scope) IsValid() bool {
 }
 
 var _ScopeValue = map[string]Scope{
-	_ScopeName[0:4]:  ScopeClub,
-	_ScopeName[4:8]:  ScopeTeam,
-	_ScopeName[8:19]: ScopeTeamPrivate,
+	_ScopeName[0:4]:   ScopeClub,
+	_ScopeName[4:8]:   ScopeTeam,
+	_ScopeName[8:13]:  ScopeCoach,
+	_ScopeName[13:19]: ScopePlayer,
 }
 
 // ParseScope attempts to convert a string to a Scope.
