@@ -15,7 +15,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/naivary/omp/keycloak"
+	"github.com/naivary/omp/club"
 	"github.com/naivary/omp/logger"
 	"github.com/naivary/omp/postgres"
 )
@@ -46,11 +46,10 @@ func run(
 	if err != nil {
 		return err
 	}
-	clubMngr, err := keycloak.NewClubManager(ctx, cfg.oidcIssuer, cfg.oidcClubClientID, cfg.oidcClubClientSecret)
+	clubMngr, err := club.NewManager(ctx, cfg.oidcIssuer, cfg.oidcClubClientID, cfg.oidcClubClientSecret)
 	if err != nil {
 		return err
 	}
-	_ = clubMngr
 	// start the server with graceful handling
 	interuptCtx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
@@ -68,7 +67,6 @@ func run(
 			panic(err)
 		}
 	}()
-
 	// wait for interrupt signal for graceful shutdown procedure
 	<-interuptCtx.Done()
 	logger.Info("Interrupt signal received. Gracefully shutting down server")

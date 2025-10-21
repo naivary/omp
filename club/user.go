@@ -1,11 +1,11 @@
-package keycloak
+package club
 
 import (
 	"context"
 	"fmt"
-	"net/url"
 
-	"golang.org/x/oauth2/clientcredentials"
+	clubv1 "github.com/naivary/omp/api/club/v1"
+	"github.com/naivary/omp/keycloak"
 )
 
 type clubManager struct {
@@ -14,25 +14,24 @@ type clubManager struct {
 	clientSecret string
 }
 
-func NewClubManager(ctx context.Context, issuer, clientID, clientSecret string) (*clubManager, error) {
+func NewManager(ctx context.Context, issuer, clientID, clientSecret string) (*clubManager, error) {
 	clubMngr := &clubManager{
 		issuer:       issuer,
 		clientID:     clientID,
 		clientSecret: clientSecret,
 	}
-	tokenURL, err := url.JoinPath(issuer, "realms", "clubs", "protocol", "openid-connect", "token")
+	_, err := keycloak.NewTokenForClient(ctx, issuer, "clubs", clientID, clientSecret)
+	return clubMngr, err
+}
+
+func (c *clubManager) CreateUser(user *clubv1.User) error {
+	user.Enabled = true
+	ctx := context.Background()
+	token, err := keycloak.NewTokenForClient(ctx, c.issuer, "clubs", c.clientID, c.clientSecret)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	clientCredsConfig := &clientcredentials.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		TokenURL:     tokenURL,
-	}
-	jwtToken, err := clientCredsConfig.Token(ctx)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(jwtToken.AccessToken)
-	return clubMngr, nil
+	code, err := keycloak.CreateUser(context.Background(), c.issuer, token.AccessToken, "clubs", user)
+	fmt.Println(code, err)
+	return err
 }
