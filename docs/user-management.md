@@ -18,4 +18,5 @@ choosen is accepting them.
 
 Funtionaries can only be created by the root user.
 
-When a Coach joins a Team he unlocks certrain operations to manage the team.
+When a Coach joins a Team he unlocks TEAM_OWNER_OPERATIONS.
+
