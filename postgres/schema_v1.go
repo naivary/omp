@@ -24,38 +24,33 @@ func provisionStatementV1() *provisionStatement {
 		 return ((r1 << 16) + l1);
 		END;
 		$$ LANGUAGE plpgsql strict immutable;
+
 		CREATE SEQUENCE IF NOT EXISTS id_seq START 1;
 
 		CREATE TABLE IF NOT EXISTS club(
-			id int PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
-			name text,
-			timezone text DEFAULT 'Europe/Berlin'
+			id bigint PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
+			name text NOT NULL,
+			location text NOT NULL
 		);
 
 		CREATE TABLE IF NOT EXISTS team(
-			id int PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
-			club_id int REFERENCES club(id),
-			name text,
-			league text
+			id bigint PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
+			name text NOT NULL UNIQUE,
+			league text NOT NULL,
+			-- foreign keys
+			club_id bigint REFERENCES club(id)
 		);
 
-		CREATE TABLE IF NOT EXISTS metric_type(
-			name text PRIMARY KEY
-		);
-		INSERT INTO metric_type VALUES('Counter');
-		INSERT INTO metric_type VALUES('Gauge');
-
-		CREATE TYPE scope AS ENUM('Club', 'Team', 'Private');
-		CREATE TABLE IF NOT EXISTS metric_defintion(
-			id int PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
-			name text,
-			type text REFERENCES metric_type(name),
-			scope scope,
-			description text,
-			club_id int REFERENCES club(id),
-			team_id int REFERENCES team(id),
-			UNIQUE(name, scope, club_id),
-			UNIQUE(name, scope, team_id)
+		CREATE TYPE foot AS ENUM ('right', 'left', 'both');
+		CREATE TABLE IF NOT EXISTS player_profile(
+			id bigint PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
+			first_name text NOT NULL,
+			last_name text NOT NULL,
+			jersey_number int,
+			position text NOT NULL,
+			strong_foot foot NOT NULL,
+			-- foreign keys
+			team_id bigint REFERENCES team(id)
 		);
 
 		CREATE TABLE omp_metadata(

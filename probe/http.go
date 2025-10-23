@@ -27,7 +27,7 @@ func DoHTTPWithClient(r *http.Request, client *http.Client, timeout time.Duratio
 			return Failed, err
 		}
 		res.Body.Close()
-		if isSuccessful(res.StatusCode) {
+		if is2XX(res.StatusCode) {
 			return Success, nil
 		}
 	}
@@ -46,6 +46,6 @@ func DoHTTP(r *http.Request, timeout time.Duration) (Result, error) {
 //
 // A status code is considered successful if it falls within the 2xx range
 // (i.e., from http.StatusOK to http.StatusIMUsed, inclusive).
-func isSuccessful(code int) bool {
-	return code >= http.StatusOK && code <= http.StatusIMUsed
+func is2XX(code int) bool {
+	return code >= 200 && code < 300
 }

@@ -1,0 +1,17 @@
+{
+  "$id": "https://raw.githubusercontent.com/naivary/omp/refs/heads/main/api/openapi/schemas/create_player_request.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "create new player request",
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "password": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 32
+    }
+  }
+}

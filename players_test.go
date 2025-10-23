@@ -1,21 +1,30 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"testing"
+
+	v1 "github.com/naivary/omp/api/player/v1"
 )
 
-func TestLivez(t *testing.T) {
+func TestCreatePlayer(t *testing.T) {
 	tests := []struct {
 		name string
 		code int
+		req  *v1.CreatePlayerRequest
 	}{
 		{
-			name: "liveness",
-			code: http.StatusOK,
+			name: "valid player creation",
+			code: http.StatusCreated,
+			req: &v1.CreatePlayerRequest{
+				Email:    "test@omp.de",
+				Password: "test",
+			},
 		},
 	}
 	ctx := context.Background()
@@ -27,7 +36,7 @@ func TestLivez(t *testing.T) {
 		t.Errorf("new test sever: %s", err)
 		t.FailNow()
 	}
-	endpoint, err := url.JoinPath(baseURL, "livez")
+	endpoint, err := url.JoinPath(baseURL, "players")
 	if err != nil {
 		t.Errorf("URL join path: %s", err)
 		t.FailNow()
@@ -35,12 +44,16 @@ func TestLivez(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			r := NewRequest[any](http.MethodGet, endpoint, nil)
+			r := NewRequest(http.MethodPost, endpoint, tc.req)
 			res, err := http.DefaultClient.Do(r)
 			if err != nil {
-				t.Fatalf("do request: %s", err)
+				t.Fatalf("send request: %v", err)
 			}
+			defer res.Body.Close()
+			var errMsg bytes.Buffer
+			io.Copy(&errMsg, res.Body)
 			if res.StatusCode != tc.code {
+				t.Logf("err msg: %s", errMsg.String())
 				t.Fatalf("status code differ. Got: %d; Want: %d", res.StatusCode, tc.code)
 			}
 		})

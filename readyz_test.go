@@ -34,19 +34,13 @@ func TestReadyz(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			r, err := http.NewRequest(http.MethodGet, endpoint, nil)
-			if err != nil {
-				t.Errorf("new request: %s", err)
-				t.FailNow()
-			}
+			r := NewRequest[any](http.MethodGet, endpoint, nil)
 			res, err := http.DefaultClient.Do(r)
 			if err != nil {
-				t.Errorf("do request: %s", err)
-				t.FailNow()
+				t.Fatalf("do request: %s", err)
 			}
 			if res.StatusCode != tc.code {
-				t.Errorf("status code differ. Got: %d; Want: %d", res.StatusCode, tc.code)
-				t.FailNow()
+				t.Fatalf("status code differ. Got: %d; Want: %d", res.StatusCode, tc.code)
 			}
 		})
 	}

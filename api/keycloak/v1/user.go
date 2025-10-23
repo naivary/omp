@@ -12,7 +12,3 @@ type Credential struct {
 	Value     string `json:"value"`
 	Temporary bool   `json:"temporary"`
 }
-
-type ErrorResponse struct {
-	Type string
-}

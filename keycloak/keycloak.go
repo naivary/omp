@@ -15,13 +15,50 @@ import (
 	keycloakv1 "github.com/naivary/omp/api/keycloak/v1"
 )
 
+func is4XX(code int) bool {
+	return code >= 400 && code < 500
+}
+
+func newError(r io.Reader) error {
+	var buf bytes.Buffer
+	_, err := io.Copy(&buf, r)
+	if err != nil {
+		return err
+	}
+	return fmt.Errorf("response error: %s", buf.String())
+}
+
+func newRequest[T any](method, endpoint string, body T, header http.Header, query url.Values) (*http.Request, error) {
+	if header == nil {
+		header = http.Header{}
+	}
+	if query == nil {
+		query = url.Values{}
+	}
+	data, err := json.Marshal(&body)
+	if err != nil {
+		return nil, err
+	}
+	r, err := http.NewRequest(method, endpoint, bytes.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+	r.Header = header
+	r.URL.RawQuery = query.Encode()
+	return r, nil
+}
+
 type Keycloak interface {
 	CreateUser(user *keycloakv1.User) error
+	EnableUser(email string) error
+	GetUserID(email string) (string, error)
 }
 
 var _ Keycloak = (*keycloak)(nil)
 
 type keycloak struct {
+	// ctx the instance was created from. When this context is cancelled no
+	// further request should be accepted
 	ctx context.Context
 
 	// url of the keycloak server
@@ -67,35 +104,94 @@ func (k *keycloak) CreateUser(user *keycloakv1.User) error {
 	if err != nil {
 		return err
 	}
-	data, err := json.Marshal(&user)
-	if err != nil {
-		return err
-	}
-	body := bytes.NewReader(data)
-	r, err := http.NewRequest(http.MethodPost, endpoint, body)
-	if err != nil {
-		return err
-	}
 	token, err := k.newToken()
 	if err != nil {
 		return err
 	}
-	r.Header.Add("Content-Type", "application/json")
-	bearer := fmt.Sprintf("Bearer %s", token.AccessToken)
-	r.Header.Add("Authorization", bearer)
+	r, err := newRequest(http.MethodPost, endpoint, user,
+		http.Header{
+			"Content-Type":  {"application/json"},
+			"Authorization": {fmt.Sprintf("Bearer %s", token.AccessToken)},
+		},
+		url.Values{},
+	)
+	if err != nil {
+		return err
+	}
 	res, err := http.DefaultClient.Do(r)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 	if is4XX(res.StatusCode) {
-		var buf bytes.Buffer
-		io.Copy(&buf, res.Body)
-		return fmt.Errorf("4XX status code: %s", buf.String())
+		return newError(res.Body)
 	}
 	return err
 }
 
-func is4XX(code int) bool {
-	return code >= 400 && code < 500
+func (k *keycloak) EnableUser(email string) error {
+	token, err := k.newToken()
+	if err != nil {
+		return err
+	}
+	id, err := k.GetUserID(email)
+	if err != nil {
+		return err
+	}
+	endpoint, err := url.JoinPath(k.url, "admin", "realms", k.realm, "users", id)
+	if err != nil {
+		return err
+	}
+	r, err := newRequest(http.MethodPut, endpoint, map[string]bool{"enabled": true},
+		http.Header{
+			"Authorization": {fmt.Sprintf("Bearer %s", token.AccessToken)},
+		},
+		url.Values{},
+	)
+	res, err := http.DefaultClient.Do(r)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if is4XX(res.StatusCode) {
+		return newError(res.Body)
+	}
+	return err
+}
+
+func (k *keycloak) GetUserID(email string) (string, error) {
+	id := ""
+	token, err := k.newToken()
+	if err != nil {
+		return id, err
+	}
+	endpoint, err := url.JoinPath(k.url, "admin", "realms", k.realm, "users")
+	if err != nil {
+		return id, err
+	}
+	r, err := newRequest[any](http.MethodGet, endpoint, nil,
+		http.Header{
+			"Authorization": {fmt.Sprintf("Bearer %s", token.AccessToken)},
+		},
+		url.Values{
+			"email": {email},
+		},
+	)
+	res, err := http.DefaultClient.Do(r)
+	if err != nil {
+		return id, err
+	}
+	defer res.Body.Close()
+	if is4XX(res.StatusCode) {
+		return id, newError(res.Body)
+	}
+	ids := []struct {
+		ID string `json:"id"`
+	}{}
+	err = json.NewDecoder(res.Body).Decode(&ids)
+	if err != nil {
+		return id, err
+	}
+	id = ids[0].ID
+	return id, nil
 }
