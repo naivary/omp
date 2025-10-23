@@ -12,37 +12,29 @@ import (
 )
 
 const (
-	StrongFootRight StrongFoot = iota
-	StrongFootLeft
+	StrongFootRight StrongFoot = "Right"
+	StrongFootLeft  StrongFoot = "Left"
+	StrongFootBoth  StrongFoot = "Both"
 )
 
 var ErrInvalidStrongFoot = errors.New("not a valid StrongFoot")
 
-const _StrongFootName = "RightLeft"
-
-var _StrongFootMap = map[StrongFoot]string{
-	StrongFootRight: _StrongFootName[0:5],
-	StrongFootLeft:  _StrongFootName[5:9],
-}
-
 // String implements the Stringer interface.
 func (x StrongFoot) String() string {
-	if str, ok := _StrongFootMap[x]; ok {
-		return str
-	}
-	return fmt.Sprintf("StrongFoot(%d)", x)
+	return string(x)
 }
 
 // IsValid provides a quick way to determine if the typed value is
 // part of the allowed enumerated values
 func (x StrongFoot) IsValid() bool {
-	_, ok := _StrongFootMap[x]
-	return ok
+	_, err := ParseStrongFoot(string(x))
+	return err == nil
 }
 
 var _StrongFootValue = map[string]StrongFoot{
-	_StrongFootName[0:5]: StrongFootRight,
-	_StrongFootName[5:9]: StrongFootLeft,
+	"Right": StrongFootRight,
+	"Left":  StrongFootLeft,
+	"Both":  StrongFootBoth,
 }
 
 // ParseStrongFoot attempts to convert a string to a StrongFoot.
@@ -50,18 +42,17 @@ func ParseStrongFoot(name string) (StrongFoot, error) {
 	if x, ok := _StrongFootValue[name]; ok {
 		return x, nil
 	}
-	return StrongFoot(0), fmt.Errorf("%s is %w", name, ErrInvalidStrongFoot)
+	return StrongFoot(""), fmt.Errorf("%s is %w", name, ErrInvalidStrongFoot)
 }
 
 // MarshalText implements the text marshaller method.
 func (x StrongFoot) MarshalText() ([]byte, error) {
-	return []byte(x.String()), nil
+	return []byte(string(x)), nil
 }
 
 // UnmarshalText implements the text unmarshaller method.
 func (x *StrongFoot) UnmarshalText(text []byte) error {
-	name := string(text)
-	tmp, err := ParseStrongFoot(name)
+	tmp, err := ParseStrongFoot(string(text))
 	if err != nil {
 		return err
 	}
@@ -82,64 +73,31 @@ var errStrongFootNilPtr = errors.New("value pointer is nil") // one per type for
 // Scan implements the Scanner interface.
 func (x *StrongFoot) Scan(value interface{}) (err error) {
 	if value == nil {
-		*x = StrongFoot(0)
+		*x = StrongFoot("")
 		return
 	}
 
 	// A wider range of scannable types.
 	// driver.Value values at the top of the list for expediency
 	switch v := value.(type) {
-	case int64:
-		*x = StrongFoot(v)
 	case string:
 		*x, err = ParseStrongFoot(v)
 	case []byte:
 		*x, err = ParseStrongFoot(string(v))
 	case StrongFoot:
 		*x = v
-	case int:
-		*x = StrongFoot(v)
 	case *StrongFoot:
 		if v == nil {
 			return errStrongFootNilPtr
 		}
 		*x = *v
-	case uint:
-		*x = StrongFoot(v)
-	case uint64:
-		*x = StrongFoot(v)
-	case *int:
-		if v == nil {
-			return errStrongFootNilPtr
-		}
-		*x = StrongFoot(*v)
-	case *int64:
-		if v == nil {
-			return errStrongFootNilPtr
-		}
-		*x = StrongFoot(*v)
-	case float64: // json marshals everything as a float64 if it's a number
-		*x = StrongFoot(v)
-	case *float64: // json marshals everything as a float64 if it's a number
-		if v == nil {
-			return errStrongFootNilPtr
-		}
-		*x = StrongFoot(*v)
-	case *uint:
-		if v == nil {
-			return errStrongFootNilPtr
-		}
-		*x = StrongFoot(*v)
-	case *uint64:
-		if v == nil {
-			return errStrongFootNilPtr
-		}
-		*x = StrongFoot(*v)
 	case *string:
 		if v == nil {
 			return errStrongFootNilPtr
 		}
 		*x, err = ParseStrongFoot(*v)
+	default:
+		return errors.New("invalid type for StrongFoot")
 	}
 
 	return

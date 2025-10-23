@@ -23,15 +23,20 @@
       "type": "string"
     },
     "strongFoot": {
-      "type": "integer",
+      "type": "string",
+      "enum": [
+        "Right",
+        "Left",
+        "Both"
+      ],
       "default": "right"
     }
   },
   "required": [
+    "position",
     "email",
     "password",
     "firstName",
-    "lastName",
-    "position"
+    "lastName"
   ]
 }

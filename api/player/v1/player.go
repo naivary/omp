@@ -6,8 +6,8 @@ import (
 	"net/mail"
 )
 
-// ENUM(Right, Left)
-type StrongFoot int
+// ENUM(Right, Left, Both)
+type StrongFoot string
 
 type PlayerProfile struct {
 	ID           int64      `json:"id"`
@@ -32,10 +32,14 @@ type CreatePlayerRequest struct {
 
 	// +openapi:schema:required
 	FirstName string
+
 	// +openapi:schema:required
 	LastName string
-	// +openapi:schema:default="right"
+
+	// +openapi:schema:default="Right"
+	// +openapi:schema:enum=["Right", "Left", "Both"]
 	StrongFoot StrongFoot
+
 	// +openapi:schema:required
 	Position string
 }
