@@ -16,9 +16,10 @@ type config struct {
 	pgDatabaseName string
 
 	// oidc
-	oidcIssuer           string
-	oidcClubClientID     string
-	oidcClubClientSecret string
+	oidcURL          string
+	oidcClientID     string
+	oidcClientSecret string
+	oidcRealm        string
 }
 
 func parseFlags(args []string) (*config, error) {
@@ -35,8 +36,9 @@ func parseFlags(args []string) (*config, error) {
 	fs.StringVar(&cfg.pgPassword, "pg.password", required, "password of postregsql server to use for authentication")
 	fs.StringVar(&cfg.pgDatabaseName, "pg.database", "omp", "database name")
 	// keycloak
-	fs.StringVar(&cfg.oidcIssuer, "oidc.issuer", required, "url of the OpenID Connect Server")
-	fs.StringVar(&cfg.oidcClubClientID, "oidc.club.clientID", required, "")
-	fs.StringVar(&cfg.oidcClubClientSecret, "oidc.club.clientSecret", required, "")
+	fs.StringVar(&cfg.oidcURL, "oidc.url", required, "url of the OpenID Connect Server")
+	fs.StringVar(&cfg.oidcClientID, "oidc.clientID", required, "")
+	fs.StringVar(&cfg.oidcClientSecret, "oidc.clientSecret", required, "")
+	fs.StringVar(&cfg.oidcRealm, "oidc.realm", "omp", "realm in which the users of omp reside")
 	return &cfg, fs.Parse(args[1:])
 }

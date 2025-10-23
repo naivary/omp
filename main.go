@@ -15,6 +15,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/naivary/omp/keycloak"
 	"github.com/naivary/omp/logger"
 	"github.com/naivary/omp/postgres"
 )
@@ -38,10 +39,12 @@ func run(
 	if err != nil {
 		return err
 	}
-	logger := logger.New(&slog.HandlerOptions{
-		AddSource: true,
-	})
+	logger := logger.New(&slog.HandlerOptions{AddSource: true})
 	pg, err := postgres.Connect(ctx, cfg.pgHost, cfg.pgPort, cfg.pgUsername, cfg.pgPassword, cfg.pgDatabaseName)
+	if err != nil {
+		return err
+	}
+	kc, err := keycloak.New(ctx, cfg.oidcURL, cfg.oidcRealm, cfg.oidcClientID, cfg.oidcClientSecret)
 	if err != nil {
 		return err
 	}
@@ -51,13 +54,13 @@ func run(
 	host, port := cfg.host, strconv.Itoa(cfg.port)
 	srv := &http.Server{
 		Addr:    net.JoinHostPort(host, port),
-		Handler: newHandler(pg),
+		Handler: newHandler(pg, kc),
 		BaseContext: func(net.Listener) context.Context {
 			return interuptCtx
 		},
 	}
 	go func() {
-		logger.Info("Server started!", "host", host, "port", port)
+		logger.Info("Server started!", "host", host, "port", port, "oidc.url", cfg.oidcURL, "oidc.realm", cfg.oidcRealm)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			panic(err)
 		}
@@ -73,8 +76,8 @@ func run(
 	return srv.Shutdown(shutdownCtx)
 }
 
-func newHandler(pgPool *pgxpool.Pool) http.Handler {
+func newHandler(pgPool *pgxpool.Pool, kc keycloak.Keycloak) http.Handler {
 	mux := http.NewServeMux()
-	addRoutes(mux, pgPool)
+	addRoutes(mux, pgPool, kc)
 	return mux
 }
