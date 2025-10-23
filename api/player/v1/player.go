@@ -12,7 +12,8 @@ type StrongFoot int
 type PlayerProfile struct {
 	ID           int64      `json:"id"`
 	TeamID       int64      `json:"teamID"`
-	Name         string     `json:"name"`
+	FirstName    string     `json:"firstName"`
+	LastName     string     `json:"lastName"`
 	JerseyNumber uint       `json:"jerseyNumber"`
 	StrongFoot   StrongFoot `json:"strongFoot"`
 	Position     string     `json:"position"`
@@ -30,7 +31,13 @@ type CreatePlayerRequest struct {
 	Password string `json:"password"`
 
 	// +openapi:schema:required
-	ClubID int64 `json:"clubID"`
+	FirstName string
+	// +openapi:schema:required
+	LastName string
+	// +openapi:schema:default="right"
+	StrongFoot StrongFoot
+	// +openapi:schema:required
+	Position string
 }
 
 func (c CreatePlayerRequest) Validate(ctx context.Context) map[string]string {
