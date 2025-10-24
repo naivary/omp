@@ -34,7 +34,7 @@ func createPlayer(kc keycloak.Keycloak, pg *pgxpool.Pool) HandlerFuncErr {
 			return err
 		}
 		// TODO: Create the empty profile. Player will be enabled when he joins
-		// a team/club
+		// a team/club.
 		return encode[any](w, r, http.StatusCreated, nil)
 	})
 }

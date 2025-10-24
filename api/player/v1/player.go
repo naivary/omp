@@ -9,7 +9,7 @@ import (
 // ENUM(Right, Left, Both)
 type StrongFoot string
 
-type PlayerProfile struct {
+type Profile struct {
 	ID           int64      `json:"id"`
 	TeamID       int64      `json:"teamID"`
 	FirstName    string     `json:"firstName"`
