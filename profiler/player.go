@@ -34,7 +34,7 @@ func (p *playerProfiler) Create(profile *playerv1.Profile) (int64, error) {
 		return 0, err
 	}
 	_, err = tx.Exec(p.ctx,
-		`INSERT INTO player_profile(email, first_name, last_name, jersey_number, position, strong_foot, team_id) VALUES($1, $2, $3, $4, $5, $6)`,
+		`INSERT INTO player_profile(email, first_name, last_name, jersey_number, position, strong_foot, team_id) VALUES($1, $2, $3, $4, $5, $6, $7)`,
 		profile.Email, profile.FirstName, profile.LastName, profile.JerseyNumber, profile.Position, profile.StrongFoot, profile.TeamID,
 	)
 	if err != nil {

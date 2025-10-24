@@ -7,6 +7,7 @@ import (
 
 	"github.com/naivary/omp/keycloak"
 	"github.com/naivary/omp/profiler"
+	"github.com/naivary/omp/team"
 )
 
 func addRoutes(
@@ -15,6 +16,7 @@ func addRoutes(
 	kc keycloak.Keycloak,
 	playerProfiler profiler.PlayerProfiler,
 	clubProfiler profiler.ClubProfiler,
+	teamer team.Teamer,
 ) {
 	// system
 	mux.Handle("GET /livez", Livez())
@@ -22,6 +24,9 @@ func addRoutes(
 
 	// clubs
 	mux.Handle("POST /clubs", CreateClub(kc, clubProfiler))
+
+	// teams
+	mux.Handle("POST /teams", CreateTeam(teamer))
 
 	// players
 	mux.Handle("POST /players", CreatePlayer(kc, playerProfiler))

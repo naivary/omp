@@ -19,6 +19,7 @@ import (
 	"github.com/naivary/omp/logger"
 	"github.com/naivary/omp/postgres"
 	"github.com/naivary/omp/profiler"
+	"github.com/naivary/omp/team"
 )
 
 func main() {
@@ -57,6 +58,10 @@ func run(
 	if err != nil {
 		return err
 	}
+	teamer, err := team.NewTeamer(pg)
+	if err != nil {
+		return err
+	}
 
 	// start the server with graceful handling
 	interuptCtx, cancel := signal.NotifyContext(ctx, os.Interrupt)
@@ -64,7 +69,7 @@ func run(
 	host, port := cfg.host, strconv.Itoa(cfg.port)
 	srv := &http.Server{
 		Addr:    net.JoinHostPort(host, port),
-		Handler: newHandler(pg, kc, playerProfiler, clubProfiler),
+		Handler: newHandler(pg, kc, playerProfiler, clubProfiler, teamer),
 		BaseContext: func(net.Listener) context.Context {
 			return interuptCtx
 		},
@@ -86,8 +91,14 @@ func run(
 	return srv.Shutdown(shutdownCtx)
 }
 
-func newHandler(pgPool *pgxpool.Pool, kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler, clubProfiler profiler.ClubProfiler) http.Handler {
+func newHandler(
+	pgPool *pgxpool.Pool,
+	kc keycloak.Keycloak,
+	playerProfiler profiler.PlayerProfiler,
+	clubProfiler profiler.ClubProfiler,
+	teamer team.Teamer,
+) http.Handler {
 	mux := http.NewServeMux()
-	addRoutes(mux, pgPool, kc, playerProfiler, clubProfiler)
+	addRoutes(mux, pgPool, kc, playerProfiler, clubProfiler, teamer)
 	return mux
 }

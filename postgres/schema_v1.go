@@ -29,17 +29,19 @@ func provisionStatementV1() *provisionStatement {
 
 		CREATE TABLE IF NOT EXISTS club_profile(
 			id bigint PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
-			name text NOT NULL,
+			name text NOT NULL UNIQUE,
 			location text NOT NULL,
 			timezone text NOT NULL
 		);
 
 		CREATE TABLE IF NOT EXISTS team(
 			id bigint PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
-			name text NOT NULL UNIQUE,
+			name text NOT NULL,
 			league text NOT NULL,
 			-- foreign keys
-			club_id bigint REFERENCES club_profile(id)
+			club_id bigint REFERENCES club_profile(id),
+
+			UNIQUE(club_id, name)
 		);
 
 		CREATE TYPE foot AS ENUM ('Right', 'Left', 'Both');
