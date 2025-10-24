@@ -28,13 +28,14 @@ func NewPlayerProfiler(ctx context.Context, pool *pgxpool.Pool) (PlayerProfiler,
 }
 
 func (p *playerProfiler) CreateProfile(profile *playerv1.Profile) (int64, error) {
+	var id int64
 	tx, err := p.pool.Begin(p.ctx)
 	if err != nil {
 		return 0, err
 	}
 	_, err = tx.Exec(p.ctx,
-		`INSERT INTO player_profile(first_name, last_name, jersey_number, position, strong_foot, team_id) VALUES($1, $2, $3, $4, $5, $6);`,
-		profile.FirstName, profile.LastName, profile.JerseyNumber, profile.Position, profile.StrongFoot, profile.TeamID,
+		`INSERT INTO player_profile(email, first_name, last_name, jersey_number, position, strong_foot, team_id) VALUES($1, $2, $3, $4, $5, $6)`,
+		profile.Email, profile.FirstName, profile.LastName, profile.JerseyNumber, profile.Position, profile.StrongFoot, profile.TeamID,
 	)
 	if err != nil {
 		return 0, err
@@ -43,5 +44,9 @@ func (p *playerProfiler) CreateProfile(profile *playerv1.Profile) (int64, error)
 	if err != nil {
 		return 0, err
 	}
-	return 0, nil
+	row := p.pool.QueryRow(p.ctx,
+		`SELECT id FROM player_profile WHERE email = $1`,
+		profile.Email,
+	)
+	return id, row.Scan(&id)
 }

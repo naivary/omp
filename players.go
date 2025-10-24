@@ -32,8 +32,18 @@ func createPlayer(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) 
 		if err != nil {
 			return err
 		}
-		// TODO: Create the empty profile. Player will be enabled when he joins
-		// a team/club.
-		return encode[any](w, r, http.StatusCreated, nil)
+		profile := playerv1.Profile{
+			Email:      p.Email,
+			TeamID:     p.TeamID,
+			FirstName:  p.FirstName,
+			LastName:   p.LastName,
+			StrongFoot: p.StrongFoot,
+			Position:   p.Position,
+		}
+		id, err := playerProfiler.CreateProfile(&profile)
+		if err != nil {
+			return err
+		}
+		return encode[any](w, r, http.StatusCreated, playerv1.CreatePlayerResponse{ID: id})
 	})
 }

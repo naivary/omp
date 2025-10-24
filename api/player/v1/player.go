@@ -11,6 +11,7 @@ type StrongFoot string
 
 type Profile struct {
 	ID           int64      `json:"id"`
+	Email        string     `json:"email"`
 	TeamID       int64      `json:"teamID"`
 	FirstName    string     `json:"firstName"`
 	LastName     string     `json:"lastName"`
@@ -60,4 +61,10 @@ func (c CreatePlayerRequest) Validate(ctx context.Context) map[string]string {
 		problems["email_format"] = "cannot parse email: " + err.Error()
 	}
 	return problems
+}
+
+// +openapi:schema:title="create player response"
+type CreatePlayerResponse struct {
+	// +openapi:schema:required
+	ID int64
 }

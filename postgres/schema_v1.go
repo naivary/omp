@@ -44,6 +44,7 @@ func provisionStatementV1() *provisionStatement {
 		CREATE TYPE foot AS ENUM ('right', 'left', 'both');
 		CREATE TABLE IF NOT EXISTS player_profile(
 			id bigint PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
+			email text NOT NULL UNIQUE,
 			first_name text NOT NULL,
 			last_name text NOT NULL,
 			jersey_number int,
