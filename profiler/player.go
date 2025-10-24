@@ -9,7 +9,7 @@ import (
 )
 
 type PlayerProfiler interface {
-	CreateProfile(profile *playerv1.Profile) (int64, error)
+	Create(profile *playerv1.Profile) (int64, error)
 }
 
 var _ PlayerProfiler = (*playerProfiler)(nil)
@@ -27,7 +27,7 @@ func NewPlayerProfiler(ctx context.Context, pool *pgxpool.Pool) (PlayerProfiler,
 	return pp, pool.Ping(ctx)
 }
 
-func (p *playerProfiler) CreateProfile(profile *playerv1.Profile) (int64, error) {
+func (p *playerProfiler) Create(profile *playerv1.Profile) (int64, error) {
 	var id int64
 	tx, err := p.pool.Begin(p.ctx)
 	if err != nil {

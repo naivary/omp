@@ -9,10 +9,19 @@ import (
 	"github.com/naivary/omp/profiler"
 )
 
-func addRoutes(mux *http.ServeMux, pgPool *pgxpool.Pool, kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) {
+func addRoutes(
+	mux *http.ServeMux,
+	pgPool *pgxpool.Pool,
+	kc keycloak.Keycloak,
+	playerProfiler profiler.PlayerProfiler,
+	clubProfiler profiler.ClubProfiler,
+) {
 	// system
 	mux.Handle("GET /livez", Livez())
 	mux.Handle("GET /readyz", Readyz())
+
+	// clubs
+	mux.Handle("POST /clubs", CreateClub(kc, clubProfiler))
 
 	// players
 	mux.Handle("POST /players", CreatePlayer(kc, playerProfiler))

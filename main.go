@@ -53,6 +53,10 @@ func run(
 	if err != nil {
 		return err
 	}
+	clubProfiler, err := profiler.NewClubProfiler(ctx, pg)
+	if err != nil {
+		return err
+	}
 
 	// start the server with graceful handling
 	interuptCtx, cancel := signal.NotifyContext(ctx, os.Interrupt)
@@ -60,7 +64,7 @@ func run(
 	host, port := cfg.host, strconv.Itoa(cfg.port)
 	srv := &http.Server{
 		Addr:    net.JoinHostPort(host, port),
-		Handler: newHandler(pg, kc, playerProfiler),
+		Handler: newHandler(pg, kc, playerProfiler, clubProfiler),
 		BaseContext: func(net.Listener) context.Context {
 			return interuptCtx
 		},
@@ -82,8 +86,8 @@ func run(
 	return srv.Shutdown(shutdownCtx)
 }
 
-func newHandler(pgPool *pgxpool.Pool, kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) http.Handler {
+func newHandler(pgPool *pgxpool.Pool, kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler, clubProfiler profiler.ClubProfiler) http.Handler {
 	mux := http.NewServeMux()
-	addRoutes(mux, pgPool, kc, playerProfiler)
+	addRoutes(mux, pgPool, kc, playerProfiler, clubProfiler)
 	return mux
 }

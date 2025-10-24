@@ -1,0 +1,46 @@
+package main
+
+import (
+	"net/http"
+
+	clubv1 "github.com/naivary/omp/api/club/v1"
+	"github.com/naivary/omp/keycloak"
+	"github.com/naivary/omp/profiler"
+)
+
+func CreateClub(kc keycloak.Keycloak, p profiler.ClubProfiler) *Endpoint {
+	return &Endpoint{
+		Handler: createClub(kc, p),
+		Error:   defaultErrorHandler(),
+	}
+}
+
+func createClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
+	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
+		c, err := decode[clubv1.CreateClubRequest](r)
+		if err != nil {
+			return err
+		}
+		profile := clubv1.Profile{
+			Name:     c.Name,
+			Location: c.Location,
+			Timezone: c.Timezone,
+		}
+		profileID, err := p.Create(&profile)
+		if err != nil {
+			return err
+		}
+		user := keycloak.NewUser(
+			c.Email,
+			c.Password, nil,
+			&keycloak.Attributes{
+				ProfileID: profileID,
+			},
+		)
+		err = kc.CreateUser(user)
+		if err != nil {
+			return err
+		}
+		return encode(w, r, http.StatusCreated, clubv1.CreateClubResponse{ID: profileID})
+	})
+}

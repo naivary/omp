@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 
-	kcv1 "github.com/naivary/omp/api/keycloak/v1"
 	playerv1 "github.com/naivary/omp/api/player/v1"
 	"github.com/naivary/omp/keycloak"
 	"github.com/naivary/omp/profiler"
@@ -22,16 +21,6 @@ func createPlayer(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) 
 		if err != nil {
 			return err
 		}
-		kcUser := &kcv1.User{
-			Email: p.Email,
-			Credentials: []*kcv1.Credential{
-				{Type: "password", Value: p.Password},
-			},
-		}
-		err = kc.CreateUser(kcUser)
-		if err != nil {
-			return err
-		}
 		profile := playerv1.Profile{
 			Email:      p.Email,
 			TeamID:     p.TeamID,
@@ -40,10 +29,22 @@ func createPlayer(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) 
 			StrongFoot: p.StrongFoot,
 			Position:   p.Position,
 		}
-		id, err := playerProfiler.CreateProfile(&profile)
+		profileID, err := playerProfiler.Create(&profile)
 		if err != nil {
 			return err
 		}
-		return encode[any](w, r, http.StatusCreated, playerv1.CreatePlayerResponse{ID: id})
+		kcUser := keycloak.NewUser(
+			p.Email,
+			p.Password,
+			nil,
+			&keycloak.Attributes{
+				ProfileID: profileID,
+			},
+		)
+		err = kc.CreateUser(kcUser)
+		if err != nil {
+			return err
+		}
+		return encode(w, r, http.StatusCreated, playerv1.CreatePlayerResponse{ID: profileID})
 	})
 }
