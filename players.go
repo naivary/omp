@@ -3,21 +3,20 @@ package main
 import (
 	"net/http"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-
 	kcv1 "github.com/naivary/omp/api/keycloak/v1"
 	playerv1 "github.com/naivary/omp/api/player/v1"
 	"github.com/naivary/omp/keycloak"
+	"github.com/naivary/omp/profiler"
 )
 
-func CreatePlayer(kc keycloak.Keycloak, pg *pgxpool.Pool) *Endpoint {
+func CreatePlayer(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) *Endpoint {
 	return &Endpoint{
-		Handler: createPlayer(kc, pg),
+		Handler: createPlayer(kc, playerProfiler),
 		Error:   defaultErrorHandler(),
 	}
 }
 
-func createPlayer(kc keycloak.Keycloak, pg *pgxpool.Pool) HandlerFuncErr {
+func createPlayer(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
 		p, err := decode[playerv1.CreatePlayerRequest](r)
 		if err != nil {

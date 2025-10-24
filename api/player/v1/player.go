@@ -31,17 +31,20 @@ type CreatePlayerRequest struct {
 	Password string `json:"password"`
 
 	// +openapi:schema:required
-	FirstName string
+	TeamID int64 `json:"teamID"`
 
 	// +openapi:schema:required
-	LastName string
+	FirstName string `json:"firstName"`
+
+	// +openapi:schema:required
+	LastName string `json:"lastName"`
 
 	// +openapi:schema:default="Right"
 	// +openapi:schema:enum=["Right", "Left", "Both"]
-	StrongFoot StrongFoot
+	StrongFoot StrongFoot `json:"strongFoot"`
 
 	// +openapi:schema:required
-	Position string
+	Position string `json:"position"`
 }
 
 func (c CreatePlayerRequest) Validate(ctx context.Context) map[string]string {

@@ -18,6 +18,7 @@ import (
 	"github.com/naivary/omp/keycloak"
 	"github.com/naivary/omp/logger"
 	"github.com/naivary/omp/postgres"
+	"github.com/naivary/omp/profiler"
 )
 
 func main() {
@@ -48,13 +49,18 @@ func run(
 	if err != nil {
 		return err
 	}
+	playerProfiler, err := profiler.NewPlayerProfiler(ctx, pg)
+	if err != nil {
+		return err
+	}
+
 	// start the server with graceful handling
 	interuptCtx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 	host, port := cfg.host, strconv.Itoa(cfg.port)
 	srv := &http.Server{
 		Addr:    net.JoinHostPort(host, port),
-		Handler: newHandler(pg, kc),
+		Handler: newHandler(pg, kc, playerProfiler),
 		BaseContext: func(net.Listener) context.Context {
 			return interuptCtx
 		},
@@ -76,8 +82,8 @@ func run(
 	return srv.Shutdown(shutdownCtx)
 }
 
-func newHandler(pgPool *pgxpool.Pool, kc keycloak.Keycloak) http.Handler {
+func newHandler(pgPool *pgxpool.Pool, kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) http.Handler {
 	mux := http.NewServeMux()
-	addRoutes(mux, pgPool, kc)
+	addRoutes(mux, pgPool, kc, playerProfiler)
 	return mux
 }
