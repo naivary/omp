@@ -27,17 +27,20 @@ func createClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 			Location: c.Location,
 			Timezone: c.Timezone,
 		}
-		profileID, err := p.Create(&profile)
+		profileID, err := p.Create(ctx, &profile)
 		if err != nil {
 			return err
 		}
 		user := keycloak.NewUser(
 			c.Email,
-			c.Password, nil,
+			c.Password,
+			nil,
 			&keycloak.Attributes{
 				ProfileID: profileID,
 			},
 		)
+		// club root user is always enabled by default
+		user.Enabled = true
 		err = kc.CreateUser(ctx, user)
 		if err != nil {
 			return err
@@ -61,6 +64,9 @@ func removeClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 			return err
 		}
 		err = kc.RemoveUser(ctx, c.Email)
-		return err
+		if err != nil {
+			return err
+		}
+		return p.Remove(ctx, c.ClubID)
 	})
 }

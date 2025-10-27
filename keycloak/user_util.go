@@ -10,7 +10,7 @@ type Attributes struct {
 	ProfileID int64
 }
 
-func (a Attributes) Map() map[string][]string {
+func (a *Attributes) Map() map[string][]string {
 	return map[string][]string{
 		"profileID": {strconv.FormatInt(a.ProfileID, 10)},
 	}

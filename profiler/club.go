@@ -9,49 +9,55 @@ import (
 )
 
 type ClubProfiler interface {
-	Create(profile *clubv1.Profile) (int64, error)
-	Remove(id int64) error
+	Create(ctx context.Context, profile *clubv1.Profile) (int64, error)
+	Remove(ctx context.Context, id int64) error
 }
 
 var _ ClubProfiler = (*clubProfiler)(nil)
 
 func NewClubProfiler(ctx context.Context, pool *pgxpool.Pool) (ClubProfiler, error) {
 	c := clubProfiler{
-		ctx:  ctx,
 		pool: pool,
 	}
 	return &c, pool.Ping(ctx)
 }
 
 type clubProfiler struct {
-	ctx  context.Context
 	pool *pgxpool.Pool
 }
 
-func (c *clubProfiler) Create(profile *clubv1.Profile) (int64, error) {
+func (c *clubProfiler) Create(ctx context.Context, profile *clubv1.Profile) (int64, error) {
 	var id int64
-	tx, err := c.pool.Begin(c.ctx)
+	tx, err := c.pool.Begin(ctx)
 	if err != nil {
 		return 0, err
 	}
-	_, err = tx.Exec(c.ctx,
+	_, err = tx.Exec(ctx,
 		`INSERT INTO club_profile(name, location, timezone) VALUES ($1, $2, $3)`,
 		profile.Name, profile.Location, profile.Timezone,
 	)
 	if err != nil {
 		return 0, err
 	}
-	err = tx.Commit(c.ctx)
+	err = tx.Commit(ctx)
 	if err != nil {
 		return 0, err
 	}
-	row := c.pool.QueryRow(c.ctx,
+	row := c.pool.QueryRow(ctx,
 		`SELECT id FROM club_profile WHERE name = $1`,
 		profile.Name,
 	)
 	return id, row.Scan(&id)
 }
 
-func (c *clubProfiler) Remove(id int64) error {
-	return nil
+func (c *clubProfiler) Remove(ctx context.Context, id int64) error {
+	tx, err := c.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec(ctx,
+		`DELETE FROM club_profile WHERE id = $1`,
+		id,
+	)
+	return err
 }

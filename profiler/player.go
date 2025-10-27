@@ -9,42 +9,43 @@ import (
 )
 
 type PlayerProfiler interface {
-	Create(profile *playerv1.Profile) (int64, error)
+	Create(ctx context.Context, profile *playerv1.Profile) (int64, error)
 }
 
 var _ PlayerProfiler = (*playerProfiler)(nil)
 
 type playerProfiler struct {
-	ctx  context.Context
 	pool *pgxpool.Pool
 }
 
 func NewPlayerProfiler(ctx context.Context, pool *pgxpool.Pool) (PlayerProfiler, error) {
 	pp := &playerProfiler{
-		ctx:  ctx,
 		pool: pool,
 	}
 	return pp, pool.Ping(ctx)
 }
 
-func (p *playerProfiler) Create(profile *playerv1.Profile) (int64, error) {
+func (p *playerProfiler) Create(ctx context.Context, profile *playerv1.Profile) (int64, error) {
 	var id int64
-	tx, err := p.pool.Begin(p.ctx)
-	if err != nil {
-		return 0, err
+	if err := ctx.Err(); err != nil {
+		return id, err
 	}
-	_, err = tx.Exec(p.ctx,
+	tx, err := p.pool.Begin(ctx)
+	if err != nil {
+		return id, err
+	}
+	_, err = tx.Exec(ctx,
 		`INSERT INTO player_profile(email, first_name, last_name, jersey_number, position, strong_foot, team_id) VALUES($1, $2, $3, $4, $5, $6, $7)`,
 		profile.Email, profile.FirstName, profile.LastName, profile.JerseyNumber, profile.Position, profile.StrongFoot, profile.TeamID,
 	)
 	if err != nil {
-		return 0, err
+		return id, err
 	}
-	err = tx.Commit(p.ctx)
+	err = tx.Commit(ctx)
 	if err != nil {
-		return 0, err
+		return id, err
 	}
-	row := p.pool.QueryRow(p.ctx,
+	row := p.pool.QueryRow(ctx,
 		`SELECT id FROM player_profile WHERE email = $1`,
 		profile.Email,
 	)

@@ -30,7 +30,7 @@ func createPlayer(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) 
 			StrongFoot: p.StrongFoot,
 			Position:   p.Position,
 		}
-		profileID, err := playerProfiler.Create(&profile)
+		profileID, err := playerProfiler.Create(ctx, &profile)
 		if err != nil {
 			return err
 		}

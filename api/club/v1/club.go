@@ -40,5 +40,5 @@ type DeleteClubRequest struct {
 	Email string
 
 	// +openapi:schema:required
-	Name string
+	ClubID int64
 }
