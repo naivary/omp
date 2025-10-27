@@ -17,6 +17,7 @@ func CreatePlayer(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) 
 
 func createPlayer(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
+		ctx := r.Context()
 		p, err := decode[playerv1.CreatePlayerRequest](r)
 		if err != nil {
 			return err
@@ -41,7 +42,7 @@ func createPlayer(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) 
 				ProfileID: profileID,
 			},
 		)
-		err = kc.CreateUser(kcUser)
+		err = kc.CreateUser(ctx, kcUser)
 		if err != nil {
 			return err
 		}

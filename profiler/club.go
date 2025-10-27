@@ -10,6 +10,7 @@ import (
 
 type ClubProfiler interface {
 	Create(profile *clubv1.Profile) (int64, error)
+	Remove(id int64) error
 }
 
 var _ ClubProfiler = (*clubProfiler)(nil)
@@ -49,4 +50,8 @@ func (c *clubProfiler) Create(profile *clubv1.Profile) (int64, error) {
 		profile.Name,
 	)
 	return id, row.Scan(&id)
+}
+
+func (c *clubProfiler) Remove(id int64) error {
+	return nil
 }

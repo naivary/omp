@@ -16,7 +16,7 @@ func addRoutes(
 	kc keycloak.Keycloak,
 	playerProfiler profiler.PlayerProfiler,
 	clubProfiler profiler.ClubProfiler,
-	teamer team.Teamer,
+	teamer team.TeamManager,
 ) {
 	// system
 	mux.Handle("GET /livez", Livez())
@@ -24,6 +24,7 @@ func addRoutes(
 
 	// clubs
 	mux.Handle("POST /clubs", CreateClub(kc, clubProfiler))
+	mux.Handle("DELETE /clubs", RemoveClub(kc, clubProfiler))
 
 	// teams
 	mux.Handle("POST /teams", CreateTeam(teamer))

@@ -7,14 +7,14 @@ import (
 	"github.com/naivary/omp/team"
 )
 
-func CreateTeam(teamer team.Teamer) *Endpoint {
+func CreateTeam(teamer team.TeamManager) *Endpoint {
 	return &Endpoint{
 		Handler: createTeam(teamer),
 		Error:   defaultErrorHandler(),
 	}
 }
 
-func createTeam(teamer team.Teamer) HandlerFuncErr {
+func createTeam(teamer team.TeamManager) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
 		c, err := decode[teamv1.CreateTeamRequest](r)

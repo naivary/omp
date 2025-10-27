@@ -39,7 +39,7 @@ func provisionStatementV1() *provisionStatement {
 			name text NOT NULL,
 			league text NOT NULL,
 			-- foreign keys
-			club_id bigint REFERENCES club_profile(id),
+			club_id bigint REFERENCES club_profile(id) ON DELETE CASCADE,
 
 			UNIQUE(club_id, name)
 		);
@@ -54,7 +54,7 @@ func provisionStatementV1() *provisionStatement {
 			position text NOT NULL,
 			strong_foot foot NOT NULL,
 			-- foreign keys
-			team_id bigint REFERENCES team(id)
+			team_id bigint REFERENCES team(id) ON DELETE CASCADE
 		);
 
 		CREATE TABLE omp_metadata(

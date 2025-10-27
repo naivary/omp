@@ -8,21 +8,21 @@ import (
 	teamv1 "github.com/naivary/omp/api/team/v1"
 )
 
-type Teamer interface {
+type TeamManager interface {
 	Create(ctx context.Context, team *teamv1.Team) (int64, error)
 }
 
-var _ Teamer = (*teamer)(nil)
+var _ TeamManager = (*teamManager)(nil)
 
-type teamer struct {
+type teamManager struct {
 	pool *pgxpool.Pool
 }
 
-func NewTeamer(pool *pgxpool.Pool) (Teamer, error) {
-	return &teamer{pool: pool}, nil
+func NewTeamer(pool *pgxpool.Pool) (TeamManager, error) {
+	return &teamManager{pool: pool}, nil
 }
 
-func (t *teamer) Create(ctx context.Context, team *teamv1.Team) (int64, error) {
+func (t *teamManager) Create(ctx context.Context, team *teamv1.Team) (int64, error) {
 	var id int64
 	tx, err := t.pool.Begin(ctx)
 	if err != nil {

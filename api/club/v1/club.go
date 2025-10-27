@@ -28,6 +28,17 @@ type CreateClubRequest struct {
 	Timezone string `json:"timezone"`
 }
 
+// +openapi:schema:title="create club response"
 type CreateClubResponse struct {
 	ID int64 `json:"id"`
+}
+
+// +openapi:schema:title="delete club request"
+type DeleteClubRequest struct {
+	// +openapi:schema:required
+	// +openapi:schema:format="email"
+	Email string
+
+	// +openapi:schema:required
+	Name string
 }

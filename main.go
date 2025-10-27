@@ -96,7 +96,7 @@ func newHandler(
 	kc keycloak.Keycloak,
 	playerProfiler profiler.PlayerProfiler,
 	clubProfiler profiler.ClubProfiler,
-	teamer team.Teamer,
+	teamer team.TeamManager,
 ) http.Handler {
 	mux := http.NewServeMux()
 	addRoutes(mux, pgPool, kc, playerProfiler, clubProfiler, teamer)

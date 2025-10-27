@@ -17,6 +17,7 @@ func CreateClub(kc keycloak.Keycloak, p profiler.ClubProfiler) *Endpoint {
 
 func createClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
+		ctx := r.Context()
 		c, err := decode[clubv1.CreateClubRequest](r)
 		if err != nil {
 			return err
@@ -37,10 +38,29 @@ func createClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 				ProfileID: profileID,
 			},
 		)
-		err = kc.CreateUser(user)
+		err = kc.CreateUser(ctx, user)
 		if err != nil {
 			return err
 		}
 		return encode(w, r, http.StatusCreated, clubv1.CreateClubResponse{ID: profileID})
+	})
+}
+
+func RemoveClub(kc keycloak.Keycloak, p profiler.ClubProfiler) *Endpoint {
+	return &Endpoint{
+		Handler: removeClub(kc, p),
+		Error:   defaultErrorHandler(),
+	}
+}
+
+func removeClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
+	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
+		ctx := r.Context()
+		c, err := decode[clubv1.DeleteClubRequest](r)
+		if err != nil {
+			return err
+		}
+		err = kc.RemoveUser(ctx, c.Email)
+		return err
 	})
 }

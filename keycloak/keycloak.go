@@ -14,18 +14,16 @@ import (
 )
 
 type Keycloak interface {
-	CreateUser(user *keycloakv1.User) error
-	EnableUser(email string) error
-	GetUserID(email string) (string, error)
+	RemoveUser(ctx context.Context, email string) error
+	CreateUser(ctx context.Context, user *keycloakv1.User) error
+	EnableUser(ctx context.Context, email string) error
+	GetUserID(ctx context.Context, email string) (string, error)
+	GetUser(ctx context.Context, email string) (*keycloakv1.User, error)
 }
 
 var _ Keycloak = (*keycloak)(nil)
 
 type keycloak struct {
-	// ctx the instance was created from. When this context is cancelled no
-	// further request should be accepted
-	ctx context.Context
-
 	// url of the keycloak server
 	url string
 	// realm managed by the provided client credentials
@@ -50,7 +48,6 @@ func New(ctx context.Context, urll, realm, clientID, clientSecret string) (Keycl
 	// valid.
 	_, err = ccConfig.Token(ctx)
 	k := &keycloak{
-		ctx:          ctx,
 		url:          urll,
 		realm:        realm,
 		clientID:     clientID,
@@ -60,16 +57,16 @@ func New(ctx context.Context, urll, realm, clientID, clientSecret string) (Keycl
 	return k, err
 }
 
-func (k *keycloak) newToken() (*oauth2.Token, error) {
-	return k.credsConfig.Token(k.ctx)
+func (k *keycloak) newToken(ctx context.Context) (*oauth2.Token, error) {
+	return k.credsConfig.Token(ctx)
 }
 
-func (k *keycloak) CreateUser(user *keycloakv1.User) error {
+func (k *keycloak) CreateUser(ctx context.Context, user *keycloakv1.User) error {
 	endpoint, err := url.JoinPath(k.url, "admin", "realms", k.realm, "users")
 	if err != nil {
 		return err
 	}
-	token, err := k.newToken()
+	token, err := k.newToken(ctx)
 	if err != nil {
 		return err
 	}
@@ -88,18 +85,15 @@ func (k *keycloak) CreateUser(user *keycloakv1.User) error {
 		return err
 	}
 	defer res.Body.Close()
-	if is4XX(res.StatusCode) {
-		return newError(res.Body)
-	}
-	return err
+	return newError(res)
 }
 
-func (k *keycloak) EnableUser(email string) error {
-	token, err := k.newToken()
+func (k *keycloak) EnableUser(ctx context.Context, email string) error {
+	token, err := k.newToken(ctx)
 	if err != nil {
 		return err
 	}
-	id, err := k.GetUserID(email)
+	id, err := k.GetUserID(ctx, email)
 	if err != nil {
 		return err
 	}
@@ -113,26 +107,60 @@ func (k *keycloak) EnableUser(email string) error {
 		},
 		url.Values{},
 	)
+	if err != nil {
+		return err
+	}
 	res, err := http.DefaultClient.Do(r)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
-	if is4XX(res.StatusCode) {
-		return newError(res.Body)
-	}
-	return err
+	return newError(res)
 }
 
-func (k *keycloak) GetUserID(email string) (string, error) {
-	id := ""
-	token, err := k.newToken()
+func (k *keycloak) GetUserID(ctx context.Context, email string) (string, error) {
+	user, err := k.GetUser(ctx, email)
 	if err != nil {
-		return id, err
+		return "", err
+	}
+	return user.ID, err
+}
+
+func (k *keycloak) RemoveUser(ctx context.Context, email string) error {
+	token, err := k.newToken(ctx)
+	if err != nil {
+		return err
+	}
+	userID, err := k.GetUserID(ctx, email)
+	if err != nil {
+		return err
+	}
+	endpoint, err := url.JoinPath(k.url, "admin", "realms", k.realm, "users", userID)
+	if err != nil {
+		return err
+	}
+	r, err := newRequest[any](http.MethodDelete, endpoint, nil, http.Header{
+		"Authorization": {fmt.Sprintf("Bearer %s", token.AccessToken)},
+	}, nil)
+	if err != nil {
+		return err
+	}
+	res, err := http.DefaultClient.Do(r)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	return newError(res)
+}
+
+func (k *keycloak) GetUser(ctx context.Context, email string) (*keycloakv1.User, error) {
+	token, err := k.newToken(ctx)
+	if err != nil {
+		return nil, err
 	}
 	endpoint, err := url.JoinPath(k.url, "admin", "realms", k.realm, "users")
 	if err != nil {
-		return id, err
+		return nil, err
 	}
 	r, err := newRequest[any](http.MethodGet, endpoint, nil,
 		http.Header{
@@ -142,21 +170,24 @@ func (k *keycloak) GetUserID(email string) (string, error) {
 			"email": {email},
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
 	res, err := http.DefaultClient.Do(r)
 	if err != nil {
-		return id, err
+		return nil, err
 	}
 	defer res.Body.Close()
-	if is4XX(res.StatusCode) {
-		return id, newError(res.Body)
+	if isError(res) {
+		return nil, newError(res)
 	}
-	ids := []struct {
-		ID string `json:"id"`
-	}{}
-	err = json.NewDecoder(res.Body).Decode(&ids)
-	if err != nil {
-		return id, err
+	users := make([]*keycloakv1.User, 0)
+	err = json.NewDecoder(res.Body).Decode(&users)
+	if len(users) == 0 {
+		return nil, fmt.Errorf("user not found: %s", email)
 	}
-	id = ids[0].ID
-	return id, nil
+	if len(users) > 1 {
+		return nil, fmt.Errorf("more users found with the same email: %s", email)
+	}
+	return users[0], err
 }

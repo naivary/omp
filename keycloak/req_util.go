@@ -13,9 +13,20 @@ func is4XX(code int) bool {
 	return code >= 400 && code < 500
 }
 
-func newError(r io.Reader) error {
+func is5XX(code int) bool {
+	return code >= 500 && code < 600
+}
+
+func isError(res *http.Response) bool {
+	return is4XX(res.StatusCode) || is5XX(res.StatusCode)
+}
+
+func newError(res *http.Response) error {
+	if !isError(res) {
+		return nil
+	}
 	var buf bytes.Buffer
-	_, err := io.Copy(&buf, r)
+	_, err := io.Copy(&buf, res.Body)
 	if err != nil {
 		return err
 	}
