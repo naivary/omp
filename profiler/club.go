@@ -2,6 +2,7 @@ package profiler
 
 import (
 	"context"
+	"errors"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -11,6 +12,9 @@ import (
 type ClubProfiler interface {
 	Create(ctx context.Context, profile *clubv1.Profile) (int64, error)
 	Remove(ctx context.Context, id int64) error
+	Update(ctx context.Context, profile *clubv1.Profile) error
+	Read(ctx context.Context, id int64) (*clubv1.Profile, error)
+	All(ctx context.Context) ([]*clubv1.Profile, error)
 }
 
 var _ ClubProfiler = (*clubProfiler)(nil)
@@ -50,6 +54,33 @@ func (c *clubProfiler) Create(ctx context.Context, profile *clubv1.Profile) (int
 	return id, row.Scan(&id)
 }
 
+func (c *clubProfiler) Read(ctx context.Context, id int64) (*clubv1.Profile, error) {
+	p := clubv1.Profile{}
+	row := c.pool.QueryRow(ctx,
+		`SELECT * FROM club_profile WHERE id = $1`,
+		id,
+	)
+	return &p, row.Scan(&p.ID, &p.Name, &p.Location, &p.Timezone)
+}
+
+func (c *clubProfiler) Update(ctx context.Context, profile *clubv1.Profile) error {
+	if profile.ID == 0 {
+		return errors.New("update club profile: missing id")
+	}
+	_, err := c.pool.Exec(ctx,
+		`
+		UPDATE club_profile
+		SET
+		  name     = CASE WHEN $2 <> '' THEN $2 ELSE name END,
+		  location = CASE WHEN $3 <> '' THEN $3 ELSE location END,
+		  timezone = CASE WHEN $4 <> '' THEN $4 ELSE timezone END
+		WHERE id = $1;
+		`,
+		profile.ID, profile.Name, profile.Location, profile.Timezone,
+	)
+	return err
+}
+
 func (c *clubProfiler) Remove(ctx context.Context, id int64) error {
 	tx, err := c.pool.Begin(ctx)
 	if err != nil {
@@ -60,4 +91,23 @@ func (c *clubProfiler) Remove(ctx context.Context, id int64) error {
 		id,
 	)
 	return err
+}
+
+func (c *clubProfiler) All(ctx context.Context) ([]*clubv1.Profile, error) {
+	rows, err := c.pool.Query(ctx, `SELECT * FROM club_profile`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	affectedRows := rows.CommandTag().RowsAffected()
+	profiles := make([]*clubv1.Profile, 0, affectedRows)
+	for rows.Next() {
+		profile := clubv1.Profile{}
+		err = rows.Scan(&profile.ID, &profile.Name, &profile.Location, &profile.Timezone)
+		if err != nil {
+			return nil, err
+		}
+		profiles = append(profiles, &profile)
+	}
+	return profiles, nil
 }

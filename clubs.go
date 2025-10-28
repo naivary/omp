@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 
 	clubv1 "github.com/naivary/omp/api/club/v1"
 	"github.com/naivary/omp/keycloak"
@@ -49,14 +50,69 @@ func createClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 	})
 }
 
-func RemoveClub(kc keycloak.Keycloak, p profiler.ClubProfiler) *Endpoint {
+func ReadClub(p profiler.ClubProfiler) *Endpoint {
 	return &Endpoint{
-		Handler: removeClub(kc, p),
+		Handler: readClub(p),
 		Error:   defaultErrorHandler(),
 	}
 }
 
-func removeClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
+func readClub(p profiler.ClubProfiler) HandlerFuncErr {
+	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
+		ctx := r.Context()
+		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+		if err != nil {
+			return err
+		}
+		profile, err := p.Read(ctx, id)
+		if err != nil {
+			return err
+		}
+		return encode(w, r, http.StatusOK, profile)
+	})
+}
+
+func UpdateClub(p profiler.ClubProfiler) *Endpoint {
+	return &Endpoint{
+		Handler: updateClub(p),
+		Error:   defaultErrorHandler(),
+	}
+}
+
+func updateClub(p profiler.ClubProfiler) HandlerFuncErr {
+	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
+		ctx := r.Context()
+		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+		if err != nil {
+			return err
+		}
+		update, err := decode[clubv1.UpdateClubRequest](r)
+		if err != nil {
+			return err
+		}
+		profile := clubv1.Profile{
+			ID:       id,
+			Name:     update.Name,
+			Location: update.Location,
+			Timezone: update.Timezone,
+		}
+		err = p.Update(ctx, &profile)
+		if err != nil {
+			return err
+		}
+		w.WriteHeader(http.StatusNoContent)
+		return nil
+	})
+}
+
+func DeleteClub(kc keycloak.Keycloak, p profiler.ClubProfiler) *Endpoint {
+	return &Endpoint{
+		Handler: deleteClub(kc, p),
+		Error:   defaultErrorHandler(),
+	}
+}
+
+func deleteClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
 		c, err := decode[clubv1.DeleteClubRequest](r)
@@ -68,5 +124,23 @@ func removeClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 			return err
 		}
 		return p.Remove(ctx, c.ClubID)
+	})
+}
+
+func ReadAllClubs(p profiler.ClubProfiler) *Endpoint {
+	return &Endpoint{
+		Handler: readAllClubs(p),
+		Error:   defaultErrorHandler(),
+	}
+}
+
+func readAllClubs(p profiler.ClubProfiler) HandlerFuncErr {
+	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
+		ctx := r.Context()
+		profiles, err := p.All(ctx)
+		if err != nil {
+			return err
+		}
+		return encode(w, r, http.StatusOK, profiles)
 	})
 }

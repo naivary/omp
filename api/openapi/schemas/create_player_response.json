@@ -1,0 +1,1 @@
+{"$id":"https://raw.githubusercontent.com/naivary/omp/refs/heads/main/api/openapi/schemas/create_player_response.json","$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","title":"create player response","properties":{"id":{"type":"integer"}},"required":["id"]}

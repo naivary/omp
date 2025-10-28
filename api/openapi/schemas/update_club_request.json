@@ -1,0 +1,1 @@
+{"$id":"https://raw.githubusercontent.com/naivary/omp/refs/heads/main/api/openapi/schemas/update_club_request.json","$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","title":"update club request","properties":{"location":{"type":"string","minLength":1},"name":{"type":"string","minLength":1},"timezone":{"type":"string","minLength":1}}}

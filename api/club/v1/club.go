@@ -37,8 +37,20 @@ type CreateClubResponse struct {
 type DeleteClubRequest struct {
 	// +openapi:schema:required
 	// +openapi:schema:format="email"
-	Email string
+	Email string `json:"email"`
 
 	// +openapi:schema:required
-	ClubID int64
+	ClubID int64 `json:"clubID"`
+}
+
+// +openapi:schema:title="update club request"
+type UpdateClubRequest struct {
+	// +openapi:schema:minLength=1
+	Name string `json:"name"`
+
+	// +openapi:schema:minLength=1
+	Location string `json:"location"`
+
+	// +openapi:schema:minLength=1
+	Timezone string `json:"timezone"`
 }

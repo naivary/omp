@@ -1,0 +1,1 @@
+{"$id":"https://raw.githubusercontent.com/naivary/omp/refs/heads/main/api/openapi/schemas/create_team_response.json","$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","title":"create team response model","properties":{"id":{"type":"integer"}}}
