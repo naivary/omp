@@ -53,6 +53,8 @@ func NewTestServer(
 		"-pg.username", "postgres",
 		"-pg.password", "postgres",
 		"-pg.database", "omp",
+		"-pg.insert.testdata", "true",
+		// oidc client
 		"-oidc.url", "http://127.0.0.1:8080",
 		"-oidc.clientID", "omp-rest-api",
 		"-oidc.clientSecret", getenv("OMP_OIDC_CLIENT_SECRET"),

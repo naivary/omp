@@ -9,11 +9,12 @@ type config struct {
 	host string
 
 	// postgres database
-	pgHost         string
-	pgPort         int
-	pgUsername     string
-	pgPassword     string
-	pgDatabaseName string
+	pgHost           string
+	pgPort           int
+	pgUsername       string
+	pgPassword       string
+	pgDatabaseName   string
+	pgInsertTestData bool
 
 	// oidc
 	oidcURL          string
@@ -35,6 +36,7 @@ func parseFlags(args []string) (*config, error) {
 	fs.StringVar(&cfg.pgUsername, "pg.username", required, "username of postgresql server to use for authentication")
 	fs.StringVar(&cfg.pgPassword, "pg.password", required, "password of postregsql server to use for authentication")
 	fs.StringVar(&cfg.pgDatabaseName, "pg.database", "omp", "database name")
+	fs.BoolVar(&cfg.pgInsertTestData, "pg.insert.testdata", false, "whether to provision the database with test data to test against")
 	// keycloak
 	fs.StringVar(&cfg.oidcURL, "oidc.url", required, "url of the OpenID Connect Server")
 	fs.StringVar(&cfg.oidcClientID, "oidc.clientID", required, "")

@@ -10,6 +10,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const (
+	_ompMetdataKeySchemaVersion            = "schema_version"
+	_ompMetadataKeyTestdataAlreadyInserted = "test_data_already_inserted"
+)
+
 // _schemaVersion is the curretn version the schema is at. If any updates are
 // done to the schema this number will be increased by one to automatically
 // update the schema in the database accordingly.
@@ -20,7 +25,9 @@ const (
 )
 
 const (
+	// advisory lock to use for provisioning the database
 	_advisoryLockProvision = iota + 1
+	_advisoryLockInsertTestdata
 )
 
 type provisionStatement struct {
@@ -40,24 +47,13 @@ func acquireAdvisoryLock(ctx context.Context, tx pgx.Tx, reason int) error {
 // current exepected version defined by `_schemaVersion`.
 func isSchemaAtCurrentVersion(ctx context.Context, conn *pgxpool.Conn) (bool, error) {
 	var pgErr *pgconn.PgError
-	var schemaVerion string
-	rows, err := conn.Query(ctx, `SELECT value FROM omp_metadata WHERE key = 'schema_version'`)
+	value, err := GetMetadata(ctx, conn, _ompMetdataKeySchemaVersion)
 	if err != nil && errors.As(err, &pgErr) {
 		if pgErr.Code == _pgCodeRelationDoesNotExist {
 			return false, nil
 		}
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return true, errors.New(
-			"now row found for key 'schema_version'. This error should never occur. If it does then the key might have changed or the name of the table",
-		)
-	}
-	err = rows.Scan(&schemaVerion)
-	if err != nil {
-		return true, err
-	}
-	schemaVersionInt, err := strconv.Atoi(schemaVerion)
+	schemaVersionInt, err := strconv.Atoi(value)
 	return schemaVersionInt == _schemaVersion, err
 }
 
@@ -100,7 +96,7 @@ func provision(ctx context.Context, pool *pgxpool.Pool) error {
 	if err := pseudoTx.Commit(ctx); err != nil {
 		return err
 	}
-	_, err = tx.Exec(ctx, `INSERT INTO omp_metadata VALUES('schema_version', $1);`, strconv.Itoa(_schemaVersion))
+	err = AddMetadata(ctx, tx, _ompMetdataKeySchemaVersion, strconv.Itoa(_schemaVersion))
 	if err != nil {
 		return err
 	}

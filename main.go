@@ -42,23 +42,29 @@ func run(
 		return err
 	}
 	logger := logger.New(&slog.HandlerOptions{AddSource: true})
-	pg, err := postgres.Connect(ctx, cfg.pgHost, cfg.pgPort, cfg.pgUsername, cfg.pgPassword, cfg.pgDatabaseName)
+	pool, err := postgres.Connect(ctx, cfg.pgHost, cfg.pgPort, cfg.pgUsername, cfg.pgPassword, cfg.pgDatabaseName)
 	if err != nil {
 		return err
+	}
+	if cfg.pgInsertTestData {
+		err = postgres.InsertRandTestdata(ctx, pool)
+		if err != nil {
+			return err
+		}
 	}
 	kc, err := keycloak.New(ctx, cfg.oidcURL, cfg.oidcRealm, cfg.oidcClientID, cfg.oidcClientSecret)
 	if err != nil {
 		return err
 	}
-	playerProfiler, err := profiler.NewPlayerProfiler(ctx, pg)
+	playerProfiler, err := profiler.NewPlayerProfiler(ctx, pool)
 	if err != nil {
 		return err
 	}
-	clubProfiler, err := profiler.NewClubProfiler(ctx, pg)
+	clubProfiler, err := profiler.NewClubProfiler(ctx, pool)
 	if err != nil {
 		return err
 	}
-	teamer, err := team.NewTeamer(pg)
+	teamer, err := team.NewTeamer(pool)
 	if err != nil {
 		return err
 	}
@@ -69,7 +75,7 @@ func run(
 	host, port := cfg.host, strconv.Itoa(cfg.port)
 	srv := &http.Server{
 		Addr:    net.JoinHostPort(host, port),
-		Handler: newHandler(pg, kc, playerProfiler, clubProfiler, teamer),
+		Handler: newHandler(pool, kc, playerProfiler, clubProfiler, teamer),
 		BaseContext: func(net.Listener) context.Context {
 			return interuptCtx
 		},

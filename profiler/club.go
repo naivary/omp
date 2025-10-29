@@ -10,10 +10,15 @@ import (
 )
 
 type ClubProfiler interface {
+	// Create a new profile
 	Create(ctx context.Context, profile *clubv1.Profile) (int64, error)
+	// Remove the profile associatted with the id
 	Remove(ctx context.Context, id int64) error
+	// Update a profile partially or completly.
 	Update(ctx context.Context, profile *clubv1.Profile) error
+	// Read a profile associatted with the id
 	Read(ctx context.Context, id int64) (*clubv1.Profile, error)
+	// Retrieve all profiles
 	All(ctx context.Context) ([]*clubv1.Profile, error)
 }
 
