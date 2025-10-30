@@ -1,20 +1,42 @@
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:26.4.1
+    container_name: "omp-keycloak"
+    build:
+      dockerfile: build/keycloak.dockerfile
+      args:
+        KC_DB_URL: "jdbc:postgresql://omp-postgresql:5432/keycloak"
+        KC_DB_USERNAME: "postgres"
+        KC_DB_PASSWORD: "postgres"
+        KC_HEALTH_ENABLED: true
+        KC_METRICS_ENABLED: true
+        KC_DB: postgres
+    depends_on:
+      postgresql:
+        condition: service_healthy
     ports:
       - "8080:8080"
+      - "8443:8443"
+      - "9000:9000"
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     networks:
       - omp
-    command: start-dev
+    command: start --optimized --hostname=https://localhost:8443
   postgresql:
     image: postgres:trixie
+    container_name: "omp-postgresql"
     ports:
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "omp"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
     networks:
       - omp
 networks:

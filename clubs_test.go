@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -45,7 +46,9 @@ func TestCreateClub(t *testing.T) {
 			if err != nil {
 				t.Fatalf("do request: %v", err)
 			}
+			defer res.Body.Close()
 			if res.StatusCode != tc.code {
+				io.Copy(os.Stdout, res.Body)
 				t.Errorf("unexpected status code. Got: %d. Wanted: %d", res.StatusCode, tc.code)
 			}
 		})

@@ -19,6 +19,7 @@ type Keycloak interface {
 	EnableUser(ctx context.Context, email string) error
 	GetUserID(ctx context.Context, email string) (string, error)
 	GetUser(ctx context.Context, email string) (*keycloakv1.User, error)
+	IsEmailUsed(ctx context.Context, email string) (bool, error)
 }
 
 var _ Keycloak = (*keycloak)(nil)
@@ -184,10 +185,15 @@ func (k *keycloak) GetUser(ctx context.Context, email string) (*keycloakv1.User,
 	users := make([]*keycloakv1.User, 0)
 	err = json.NewDecoder(res.Body).Decode(&users)
 	if len(users) == 0 {
-		return nil, fmt.Errorf("user not found: %s", email)
+		return nil, nil
 	}
 	if len(users) > 1 {
 		return nil, fmt.Errorf("more users found with the same email: %s", email)
 	}
 	return users[0], err
+}
+
+func (k *keycloak) IsEmailUsed(ctx context.Context, email string) (bool, error) {
+	user, err := k.GetUser(ctx, email)
+	return user != nil, err
 }

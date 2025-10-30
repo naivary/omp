@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // +openapi:schema:title="http error response"
 type HTTPError struct {
 	StatusCode int
@@ -8,9 +10,9 @@ type HTTPError struct {
 	SpanID     string
 }
 
-func NewHTTPError(msg string, status int) *HTTPError {
+func NewHTTPError(status int, format string, args ...any) *HTTPError {
 	return &HTTPError{
-		Msg:        msg,
+		Msg:        fmt.Sprintf(format, args...),
 		StatusCode: status,
 	}
 }

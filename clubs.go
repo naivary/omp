@@ -23,6 +23,13 @@ func createClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 		if err != nil {
 			return err
 		}
+		isUsed, err := kc.IsEmailUsed(ctx, c.Email)
+		if err != nil {
+			return err
+		}
+		if isUsed {
+			return NewHTTPError(http.StatusBadRequest, "user with the email already exists: %s", c.Email)
+		}
 		profile := clubv1.Profile{
 			Name:     c.Name,
 			Location: c.Location,
@@ -119,11 +126,11 @@ func deleteClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 		if err != nil {
 			return err
 		}
-		err = kc.RemoveUser(ctx, c.Email)
+		err = p.Remove(ctx, c.ClubID)
 		if err != nil {
 			return err
 		}
-		return p.Remove(ctx, c.ClubID)
+		return kc.RemoveUser(ctx, c.Email)
 	})
 }
 
