@@ -24,3 +24,5 @@
 
 .terraform/*
 .terraform*
+
+terraform.tfstate*
