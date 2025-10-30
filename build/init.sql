@@ -1,0 +1,2 @@
+CREATE DATABASE omp;
+CREATE DATABASE keycloak;

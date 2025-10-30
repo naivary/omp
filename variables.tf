@@ -11,3 +11,8 @@ variable "keycloak_password" {
   type      = string
   sensitive = true
 }
+
+variable "keycloak_omp_oidc_client_secret" {
+  type      = string
+  sensitive = true
+}

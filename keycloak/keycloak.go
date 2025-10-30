@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -33,9 +34,10 @@ type keycloak struct {
 	clientSecret string
 
 	credsConfig *clientcredentials.Config
+	cl          *http.Client
 }
 
-func New(ctx context.Context, urll, realm, clientID, clientSecret string) (Keycloak, error) {
+func New(ctx context.Context, urll, realm, clientID, clientSecret string, insecureSkipVerify bool) (Keycloak, error) {
 	tokenURL, err := url.JoinPath(urll, "realms", realm, "protocol", "openid-connect", "token")
 	if err != nil {
 		return nil, err
@@ -45,20 +47,25 @@ func New(ctx context.Context, urll, realm, clientID, clientSecret string) (Keycl
 		ClientSecret: clientSecret,
 		TokenURL:     tokenURL,
 	}
-	// check if you can get a token to verify that the provided credentials are
-	// valid.
-	_, err = ccConfig.Token(ctx)
 	k := &keycloak{
 		url:          urll,
 		realm:        realm,
 		clientID:     clientID,
 		clientSecret: clientSecret,
 		credsConfig:  ccConfig,
+		cl: &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
+			},
+		},
 	}
+	ctx = context.WithValue(ctx, oauth2.HTTPClient, k.cl)
+	_, err = ccConfig.Token(ctx)
 	return k, err
 }
 
 func (k *keycloak) newToken(ctx context.Context) (*oauth2.Token, error) {
+	ctx = context.WithValue(ctx, oauth2.HTTPClient, k.cl)
 	return k.credsConfig.Token(ctx)
 }
 
@@ -81,7 +88,7 @@ func (k *keycloak) CreateUser(ctx context.Context, user *keycloakv1.User) error 
 	if err != nil {
 		return err
 	}
-	res, err := http.DefaultClient.Do(r)
+	res, err := k.cl.Do(r)
 	if err != nil {
 		return err
 	}
@@ -111,7 +118,7 @@ func (k *keycloak) EnableUser(ctx context.Context, email string) error {
 	if err != nil {
 		return err
 	}
-	res, err := http.DefaultClient.Do(r)
+	res, err := k.cl.Do(r)
 	if err != nil {
 		return err
 	}
@@ -146,7 +153,7 @@ func (k *keycloak) RemoveUser(ctx context.Context, email string) error {
 	if err != nil {
 		return err
 	}
-	res, err := http.DefaultClient.Do(r)
+	res, err := k.cl.Do(r)
 	if err != nil {
 		return err
 	}
@@ -174,7 +181,7 @@ func (k *keycloak) GetUser(ctx context.Context, email string) (*keycloakv1.User,
 	if err != nil {
 		return nil, err
 	}
-	res, err := http.DefaultClient.Do(r)
+	res, err := k.cl.Do(r)
 	if err != nil {
 		return nil, err
 	}

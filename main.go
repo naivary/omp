@@ -52,7 +52,7 @@ func run(
 			return err
 		}
 	}
-	kc, err := keycloak.New(ctx, cfg.oidcURL, cfg.oidcRealm, cfg.oidcClientID, cfg.oidcClientSecret)
+	kc, err := keycloak.New(ctx, cfg.oidcURL, cfg.oidcRealm, cfg.oidcClientID, cfg.oidcClientSecret, cfg.oidcInsecure)
 	if err != nil {
 		return err
 	}

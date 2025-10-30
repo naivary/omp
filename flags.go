@@ -21,6 +21,7 @@ type config struct {
 	oidcClientID     string
 	oidcClientSecret string
 	oidcRealm        string
+	oidcInsecure     bool
 }
 
 func parseFlags(args []string) (*config, error) {
@@ -42,5 +43,6 @@ func parseFlags(args []string) (*config, error) {
 	fs.StringVar(&cfg.oidcClientID, "oidc.clientID", required, "")
 	fs.StringVar(&cfg.oidcClientSecret, "oidc.clientSecret", required, "")
 	fs.StringVar(&cfg.oidcRealm, "oidc.realm", "omp", "realm in which the users of omp reside")
+	fs.BoolVar(&cfg.oidcInsecure, "oidc.insecure", false, "whether the instance has a valid tls certificate or not")
 	return &cfg, fs.Parse(args[1:])
 }

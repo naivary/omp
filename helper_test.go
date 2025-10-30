@@ -54,9 +54,10 @@ func NewTestServer(
 		"-pg.username", "postgres",
 		"-pg.password", "postgres",
 		"-pg.database", "omp",
-		"-oidc.url", "http://127.0.0.1:8080",
+		"-oidc.url", "https://127.0.0.1:8443",
 		"-oidc.clientID", "omp-rest-api",
-		"-oidc.clientSecret", getenv("OMP_OIDC_CLIENT_SECRET"),
+		"-oidc.clientSecret", "omp",
+		"-oidc.insecure",
 	})
 	go func() {
 		err := run(ctx, args, getenv, stdin, stdout, stderr)

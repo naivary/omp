@@ -6,6 +6,10 @@ err() {
   echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
 }
 
+log() {
+    echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&1
+}
+
 # Report where docker is installed on the local machine
 # Arguments:
 #   None
@@ -49,7 +53,14 @@ function main() {
 
     docker compose up -d
 
-    sleep 10
+    while true; do
+        log "Waiting for keycloak to become ready..."
+        curl -k -s -o /dev/null https://localhost:9000/health/ready
+        if [ $? -eq 0 ]; then
+            break
+        fi
+        sleep 2
+    done
 
     terraform apply -auto-approve
 }

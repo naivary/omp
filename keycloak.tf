@@ -69,6 +69,7 @@ resource "keycloak_openid_client" "omp_rest_api" {
   standard_flow_enabled        = true
   direct_access_grants_enabled = true
   service_accounts_enabled     = true
+  client_secret = var.keycloak_omp_oidc_client_secret
 
   valid_redirect_uris = [
     "http://localhost:8080/openid-callback"
