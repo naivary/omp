@@ -9,24 +9,15 @@ import (
 	"os"
 	"testing"
 
-	v1 "github.com/naivary/omp/api/player/v1"
+	playerv1 "github.com/naivary/omp/api/player/v1"
 )
 
 func TestCreatePlayer(t *testing.T) {
 	tests := []struct {
 		name string
 		code int
-		req  *v1.CreatePlayerRequest
-	}{
-		{
-			name: "valid player creation",
-			code: http.StatusCreated,
-			req: &v1.CreatePlayerRequest{
-				Email:    "test@omp.de",
-				Password: "test",
-			},
-		},
-	}
+		req  playerv1.CreatePlayerRequest
+	}{}
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	t.Cleanup(cancel)

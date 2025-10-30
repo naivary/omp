@@ -24,13 +24,11 @@ func TestLivez(t *testing.T) {
 
 	baseURL, err := NewTestServer(ctx, nil, os.Getenv, os.Stdin, os.Stdout, os.Stderr)
 	if err != nil {
-		t.Errorf("new test sever: %s", err)
-		t.FailNow()
+		t.Fatalf("new test sever: %s", err)
 	}
 	endpoint, err := url.JoinPath(baseURL, "livez")
 	if err != nil {
-		t.Errorf("URL join path: %s", err)
-		t.FailNow()
+		t.Fatalf("URL join path: %s", err)
 	}
 
 	for _, tc := range tests {

@@ -41,6 +41,7 @@ func run(
 	if err != nil {
 		return err
 	}
+	fmt.Println(cfg)
 	logger := logger.New(&slog.HandlerOptions{AddSource: true})
 	pool, err := postgres.Connect(ctx, cfg.pgHost, cfg.pgPort, cfg.pgUsername, cfg.pgPassword, cfg.pgDatabaseName)
 	if err != nil {
