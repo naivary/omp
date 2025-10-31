@@ -11,3 +11,5 @@ the prefered approach because it is officially supported by keycloak.
 
 1. Should the testdata provisioning be done in the init.sql or be kept in the go
    code?
+2. REST Client should be generate from the openapi specs which then can be used
+   by the tests to communicate with the server in a standard way
