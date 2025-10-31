@@ -34,7 +34,7 @@ func getAllClubProfiles() ([]*clubv1.Profile, error) {
 		return nil, err
 	}
 	defer res.Body.Close()
-	clubs := make([]*clubv1.Profile, 0, 100)
+	clubs := make([]*clubv1.Profile, 0, 10)
 	return clubs, json.NewDecoder(res.Body).Decode(&clubs)
 }
 
@@ -161,15 +161,15 @@ func TestReadAllClubs(t *testing.T) {
 			if res.StatusCode != tc.code {
 				t.Errorf("unexpected status code. Got: %d. Wanted: %d", res.StatusCode, tc.code)
 			}
-			// there will be 100 club profiles provisioned beforehand
-			numClubs := 100
+			// there will be 10 club profiles provisioned beforehand
+			numClubs := 10
 			clubs := make([]*clubv1.Profile, 0, numClubs)
 			err = json.NewDecoder(res.Body).Decode(&clubs)
 			if err != nil {
 				t.Fatalf("json decode: %v", err)
 			}
-			if len(clubs) < 100 {
-				t.Errorf("number of club profiles not expected. Got: %d. Want: >=100", len(clubs))
+			if len(clubs) < 10 {
+				t.Errorf("number of club profiles not expected. Got: %d. Want: >=10", len(clubs))
 			}
 		})
 	}

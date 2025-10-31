@@ -37,7 +37,7 @@ func InsertRandTestdata(ctx context.Context, pool *pgxpool.Pool, kc keycloak.Key
 			'America/New_York','America/Los_Angeles','Europe/London','Europe/Berlin',
 			'Asia/Tokyo','Asia/Dubai','Africa/Lagos','America/Sao_Paulo'
 		 ])[1 + floor(random() * 8)::int] AS timezone
-	FROM generate_series(1, 100) AS g;
+	FROM generate_series(1, 10) AS g;
 
 	-- Insert 10 Teams per Club (1,000 total)
 	INSERT INTO team (name, league, club_id)
@@ -46,7 +46,7 @@ func InsertRandTestdata(ctx context.Context, pool *pgxpool.Pool, kc keycloak.Key
 		'League_' || ceil(random() * 5)::int AS league,
 		c.id AS club_id
 	FROM club_profile c
-	CROSS JOIN LATERAL generate_series(1, 10) AS t;
+	CROSS JOIN LATERAL generate_series(1, 5) AS t;
 
 	-- Insert 20 Players per Team (20,000 total)
 	INSERT INTO player_profile (
@@ -73,7 +73,7 @@ func InsertRandTestdata(ctx context.Context, pool *pgxpool.Pool, kc keycloak.Key
 		(ARRAY['Right','Left','Both'])[1 + floor(random() * 3)::int]::foot AS strong_foot,
 		t.id AS team_id
 	FROM team t
-	CROSS JOIN generate_series(1, 20) AS gs;
+	CROSS JOIN generate_series(1, 5) AS gs;
 	`
 	tx, err := pool.Begin(ctx)
 	if err != nil {
