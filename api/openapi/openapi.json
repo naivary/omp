@@ -1,0 +1,76 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "",
+    "title": "",
+    "contact": {
+      "name": "mustafa.hussaini",
+      "email": "info@omp.de"
+    },
+    "license": {
+      "name": "Apache-2.0"
+    }
+  },
+  "paths": {
+    "/players": {
+      "post": {
+        "tags": [
+          "PlayerProfile"
+        ],
+        "summary": "Create a new player profile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlayerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePlayerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateClubRequest": {
+        "$ref": "./schemas/create_club_request.json"
+      },
+      "CreateClubResponse": {
+        "$ref": "./schemas/create_club_response.json"
+      },
+      "CreatePlayerRequest": {
+        "$ref": "./schemas/create_player_request.json"
+      },
+      "CreatePlayerResponse": {
+        "$ref": "./schemas/create_player_response.json"
+      },
+      "CreateTeamRequest": {
+        "$ref": "./schemas/create_team_request.json"
+      },
+      "CreateTeamResponse": {
+        "$ref": "./schemas/create_team_response.json"
+      },
+      "DeleteClubRequest": {
+        "$ref": "./schemas/delete_club_request.json"
+      },
+      "HttpError": {
+        "$ref": "./schemas/http_error.json"
+      },
+      "UpdateClubRequest": {
+        "$ref": "./schemas/update_club_request.json"
+      }
+    }
+  }
+}

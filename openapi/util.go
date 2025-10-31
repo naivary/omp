@@ -7,6 +7,9 @@ import (
 
 func typeName(v any) string {
 	t := reflect.TypeOf(v)
+	if t == nil {
+		return ""
+	}
 	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}

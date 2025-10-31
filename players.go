@@ -5,17 +5,26 @@ import (
 
 	playerv1 "github.com/naivary/omp/api/player/v1"
 	"github.com/naivary/omp/keycloak"
+	"github.com/naivary/omp/openapi"
 	"github.com/naivary/omp/profiler"
 )
 
-func CreatePlayer(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) *Endpoint {
+func CreatePlayerProfile(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) *Endpoint {
 	return &Endpoint{
-		Handler: createPlayer(kc, playerProfiler),
-		Error:   defaultErrorHandler(),
+		Handler:     createPlayerProfile(kc, playerProfiler),
+		Error:       defaultErrorHandler(),
+		Pattern:     "POST /players",
+		Summary:     "Create a new player profile",
+		Tags:        []string{"PlayerProfile"},
+		OperationID: "createPlayerProfile",
+		RequestBody: openapi.NewReqBody[playerv1.CreatePlayerRequest]("", true),
+		Responses: map[string]*openapi.Response{
+			"200": openapi.NewResponse[playerv1.CreatePlayerResponse](""),
+		},
 	}
 }
 
-func createPlayer(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) HandlerFuncErr {
+func createPlayerProfile(kc keycloak.Keycloak, playerProfiler profiler.PlayerProfiler) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
 		p, err := decode[playerv1.CreatePlayerRequest](r)

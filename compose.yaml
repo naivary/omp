@@ -7,9 +7,7 @@ services:
         KC_DB_URL: "jdbc:postgresql://omp-postgresql:5432/keycloak"
         KC_DB_USERNAME: "postgres"
         KC_DB_PASSWORD: "postgres"
-        KC_HEALTH_ENABLED: true
-        KC_METRICS_ENABLED: true
-        KC_DB: postgres
+        KC_DB: "postgres"
     depends_on:
       postgresql:
         condition: service_healthy

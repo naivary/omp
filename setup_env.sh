@@ -14,16 +14,24 @@ log() {
 # Arguments:
 #   None
 function is_docker_installed() {
-    local code=$(docker version)
-    if [ $? -eq 0]; then
+    docker version
+    if [ $? -eq 0 ]; then
         return 0
     fi
     return 1
 }
 
 function is_go_installed() {
-    local code=$(go version)
-    if [ $? -eq 0]; then
+    go version
+    if [ $? -eq 0 ]; then
+        return 0
+    fi
+    return 1
+}
+
+function is_terraform_installed() {
+    terraform -help
+    if [ $? -eq 0 ]; then
         return 0
     fi
     return 1
@@ -45,6 +53,9 @@ function main() {
     fi
     if [ ! is_go_installed ]; then
         err "golang is not isntalled"
+    fi
+    if [ ! is_terraform_installed ]; then
+        err "terraform is not isntalled"
     fi
 
     if [ is_env_running ]; then

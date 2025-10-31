@@ -8,10 +8,12 @@ type RequestBody struct {
 	Content     map[string]*MediaType `json:"content,omitempty"`
 }
 
-func NewReqBody(desc string, required bool, model any) *RequestBody {
+func NewReqBody[T any](desc string, required bool) *RequestBody {
+	var model T
 	var s *Schema
-	if model != nil {
-		s = &Schema{Ref: reflect.TypeOf(model).Name()}
+	typ := reflect.TypeOf(model)
+	if typ != nil {
+		s = &Schema{Ref: componentRef("schemas", typ.Name())}
 	}
 	req := &RequestBody{
 		Description: desc,

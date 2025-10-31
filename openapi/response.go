@@ -1,5 +1,7 @@
 package openapi
 
+import "reflect"
+
 type Response struct {
 	Ref         string                `json:"$ref,omitempty"`
 	Summary     string                `json:"summary,omitempty"`
@@ -13,9 +15,11 @@ func NewResRef(ref string) *Response {
 	return &Response{Ref: ref}
 }
 
-func NewResponse(desc string, model any) *Response {
+func NewResponse[T any](desc string) *Response {
+	var model T
 	var s *Schema
-	if model != nil {
+	typ := reflect.TypeOf(model)
+	if typ != nil {
 		s = &Schema{Ref: componentRef("schemas", typeName(model))}
 	}
 	res := &Response{

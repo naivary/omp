@@ -73,9 +73,13 @@ func run(
 	interuptCtx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 	host, port := cfg.host, strconv.Itoa(cfg.port)
+	handler, err := newHandler(pool, kc, playerProfiler, clubProfiler, teamer)
+	if err != nil {
+		return err
+	}
 	srv := &http.Server{
 		Addr:    net.JoinHostPort(host, port),
-		Handler: newHandler(pool, kc, playerProfiler, clubProfiler, teamer),
+		Handler: handler,
 		BaseContext: func(net.Listener) context.Context {
 			return interuptCtx
 		},
@@ -103,8 +107,7 @@ func newHandler(
 	playerProfiler profiler.PlayerProfiler,
 	clubProfiler profiler.ClubProfiler,
 	teamer team.TeamManager,
-) http.Handler {
+) (http.Handler, error) {
 	mux := http.NewServeMux()
-	addRoutes(mux, pgPool, kc, playerProfiler, clubProfiler, teamer)
-	return mux
+	return mux, addRoutes(mux, pgPool, kc, playerProfiler, clubProfiler, teamer)
 }
