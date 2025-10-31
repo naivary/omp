@@ -50,7 +50,7 @@ func NewTestServer(
 	args = slices.Concat(args, []string{
 		"omp",
 		"-port", strconv.Itoa(port),
-		"-pg.insert.testdata",
+		"-env", "test",
 		"-pg.username", "postgres",
 		"-pg.password", "postgres",
 		"-pg.database", "omp",
