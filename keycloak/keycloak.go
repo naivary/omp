@@ -127,6 +127,13 @@ func (k *keycloak) EnableUser(ctx context.Context, email string) error {
 }
 
 func (k *keycloak) GetUserID(ctx context.Context, email string) (string, error) {
+	isUsed, err := k.IsEmailUsed(ctx, email)
+	if err != nil {
+		return "", err
+	}
+	if !isUsed {
+		return "", fmt.Errorf("user does not exist: %s", email)
+	}
 	user, err := k.GetUser(ctx, email)
 	if err != nil {
 		return "", err

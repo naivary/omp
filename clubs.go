@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -33,6 +32,7 @@ func createClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 		}
 		profile := clubv1.Profile{
 			Name:     c.Name,
+			Email:    c.Email,
 			Location: c.Location,
 			Timezone: c.Timezone,
 		}
@@ -123,20 +123,27 @@ func DeleteClub(kc keycloak.Keycloak, p profiler.ClubProfiler) *Endpoint {
 func deleteClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
+		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+		if err != nil {
+			return err
+		}
 		c, err := decode[clubv1.DeleteClubRequest](r)
 		if err != nil {
 			return err
 		}
-		isExisting := p.IsExisting(ctx, c.ClubID)
-		if !isExisting {
-			fmt.Println("###################### IM HERE")
-			return NewHTTPError(http.StatusBadRequest, "club does not exist: %d", c.ClubID)
+		if !p.IsExisting(ctx, id) {
+			return NewHTTPError(http.StatusBadRequest, "club does not exist: %d", id)
 		}
-		err = p.Remove(ctx, c.ClubID)
+		err = kc.RemoveUser(ctx, c.Email)
 		if err != nil {
 			return err
 		}
-		return kc.RemoveUser(ctx, c.Email)
+		err = p.Remove(ctx, id)
+		if err != nil {
+			return err
+		}
+		w.WriteHeader(http.StatusNoContent)
+		return nil
 	})
 }
 

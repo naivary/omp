@@ -46,15 +46,15 @@ func run(
 	if err != nil {
 		return err
 	}
-	if cfg.pgInsertTestData {
-		err = postgres.InsertRandTestdata(ctx, pool)
-		if err != nil {
-			return err
-		}
-	}
 	kc, err := keycloak.New(ctx, cfg.oidcURL, cfg.oidcRealm, cfg.oidcClientID, cfg.oidcClientSecret, cfg.oidcInsecure)
 	if err != nil {
 		return err
+	}
+	if cfg.pgInsertTestData {
+		err = postgres.InsertRandTestdata(ctx, pool, kc)
+		if err != nil {
+			return err
+		}
 	}
 	playerProfiler, err := profiler.NewPlayerProfiler(ctx, pool)
 	if err != nil {

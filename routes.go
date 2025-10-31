@@ -27,7 +27,7 @@ func addRoutes(
 	mux.Handle("GET /clubs/{id}", ReadClub(clubProfiler))
 	mux.Handle("PATCH /clubs/{id}", UpdateClub(clubProfiler))
 	mux.Handle("GET /clubs", ReadAllClubs(clubProfiler))
-	mux.Handle("DELETE /clubs", DeleteClub(kc, clubProfiler))
+	mux.Handle("DELETE /clubs/{id}", DeleteClub(kc, clubProfiler))
 
 	// teams
 	mux.Handle("POST /teams", CreateTeam(teamer))

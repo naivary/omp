@@ -39,9 +39,6 @@ type DeleteClubRequest struct {
 	// +openapi:schema:required
 	// +openapi:schema:format="email"
 	Email string `json:"email"`
-
-	// +openapi:schema:required
-	ClubID int64 `json:"clubID"`
 }
 
 // +openapi:schema:title="update club request"

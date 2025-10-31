@@ -3,6 +3,7 @@ package profiler
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -20,7 +21,6 @@ type ClubProfiler interface {
 	Read(ctx context.Context, id int64) (*clubv1.Profile, error)
 	// Retrieve all profiles
 	All(ctx context.Context) ([]*clubv1.Profile, error)
-
 	// Non-nil error means the user does not exist
 	IsExisting(ctx context.Context, id int64) bool
 }
@@ -45,7 +45,7 @@ func (c *clubProfiler) Create(ctx context.Context, profile *clubv1.Profile) (int
 		return 0, err
 	}
 	_, err = tx.Exec(ctx,
-		`INSERT INTO club_profile(name, email, location, timezone) VALUES ($1, $2, $3)`,
+		`INSERT INTO club_profile(name, email, location, timezone) VALUES ($1, $2, $3, $4)`,
 		profile.Name, profile.Email, profile.Location, profile.Timezone,
 	)
 	if err != nil {
@@ -68,7 +68,7 @@ func (c *clubProfiler) Read(ctx context.Context, id int64) (*clubv1.Profile, err
 		`SELECT * FROM club_profile WHERE id = $1`,
 		id,
 	)
-	return &p, row.Scan(&p.ID, &p.Name, &p.Location, &p.Timezone)
+	return &p, row.Scan(&p.ID, &p.Name, &p.Email, &p.Location, &p.Timezone)
 }
 
 func (c *clubProfiler) Update(ctx context.Context, profile *clubv1.Profile) error {
@@ -90,11 +90,10 @@ func (c *clubProfiler) Update(ctx context.Context, profile *clubv1.Profile) erro
 }
 
 func (c *clubProfiler) Remove(ctx context.Context, id int64) error {
-	tx, err := c.pool.Begin(ctx)
-	if err != nil {
-		return err
+	if id <= 0 {
+		return fmt.Errorf("invalid id: %d", id)
 	}
-	_, err = tx.Exec(ctx,
+	_, err := c.pool.Exec(ctx,
 		`DELETE FROM club_profile WHERE id = $1`,
 		id,
 	)
@@ -111,7 +110,7 @@ func (c *clubProfiler) All(ctx context.Context) ([]*clubv1.Profile, error) {
 	profiles := make([]*clubv1.Profile, 0, affectedRows)
 	for rows.Next() {
 		profile := clubv1.Profile{}
-		err = rows.Scan(&profile.ID, &profile.Name, &profile.Location, &profile.Timezone)
+		err = rows.Scan(&profile.ID, &profile.Name, &profile.Email, &profile.Location, &profile.Timezone)
 		if err != nil {
 			return nil, err
 		}

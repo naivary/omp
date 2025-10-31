@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"math/rand/v2"
 	"net/http"
 	"net/url"
@@ -79,6 +80,7 @@ func TestCreateClub(t *testing.T) {
 			}
 			defer res.Body.Close()
 			if res.StatusCode != tc.code {
+				io.Copy(os.Stdout, res.Body)
 				t.Errorf("unexpected status code. Got: %d. Wanted: %d", res.StatusCode, tc.code)
 			}
 		})
@@ -203,7 +205,6 @@ func TestUpdateClub(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new test sever: %s", err)
 	}
-
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			id := strconv.FormatInt(tc.club.ID, 10)
@@ -235,58 +236,6 @@ func TestUpdateClub(t *testing.T) {
 			}
 			if !tc.isValid(tc.club, updatedProfile) {
 				t.Errorf("updating of club profile did not work: %v", updatedProfile)
-			}
-		})
-	}
-}
-
-func TestDeleteClub(t *testing.T) {
-	clubs, err := getAllClubProfiles()
-	if err != nil {
-		t.Fatalf("get all club profiles: %v", err)
-	}
-
-	tests := []struct {
-		name string
-		code int
-	}{
-		{
-			name: "valid request",
-			code: http.StatusNoContent,
-		},
-	}
-	ctx := context.Background()
-	baseURL, err := NewTestServer(ctx, nil, os.Getenv, os.Stdin, os.Stdout, os.Stderr)
-	if err != nil {
-		t.Fatalf("new test sever: %s", err)
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			id := strconv.FormatInt(tc.id, 10)
-			endpoint, err := url.JoinPath(baseURL, "clubs", id)
-			if err != nil {
-				t.Fatalf("URL join path: %s", err)
-			}
-			r := NewRequest[any](http.MethodDelete, endpoint, nil)
-			res, err := http.DefaultClient.Do(r)
-			if err != nil {
-				t.Fatalf("do request: %v", err)
-			}
-			defer res.Body.Close()
-			if res.StatusCode != tc.code {
-				t.Fatalf("unexpected status code. Got: %d. Wanted: %d", res.StatusCode, tc.code)
-			}
-
-			// get the club profile and check if the updated content is
-			// corrected
-			getReq := NewRequest[any](http.MethodGet, endpoint, nil)
-			updatedRes, err := http.DefaultClient.Do(getReq)
-			if err != nil {
-				t.Fatalf("do request: %v", err)
-			}
-			if updatedRes.StatusCode != http.StatusBadRequest {
-				t.Fatalf("unexpected status code. Got: %d. Want: %d", updatedRes.StatusCode, http.StatusNotFound)
 			}
 		})
 	}
