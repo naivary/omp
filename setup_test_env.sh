@@ -62,7 +62,7 @@ function main() {
         sleep 2
     done
 
-    terraform apply -auto-approve
+    terraform apply -auto-approve > /dev/null
 }
 
 main
