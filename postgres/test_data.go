@@ -25,7 +25,7 @@ func isTestdataAlreadyInserted(ctx context.Context, tx pgx.Tx) (bool, error) {
 	return strconv.ParseBool(value)
 }
 
-func InsertRandTestdata(ctx context.Context, pool *pgxpool.Pool, kc keycloak.Keycloak) error {
+func InsertTestdata(ctx context.Context, pool *pgxpool.Pool, kc keycloak.Keycloak) error {
 	sql := `
 	--  Insert 100 Clubs
 	INSERT INTO club_profile (name, email, location, timezone)

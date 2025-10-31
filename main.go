@@ -50,8 +50,8 @@ func run(
 	if err != nil {
 		return err
 	}
-	if cfg.pgInsertTestData {
-		err = postgres.InsertRandTestdata(ctx, pool, kc)
+	if cfg.env == "test" {
+		err = postgres.InsertTestdata(ctx, pool, kc)
 		if err != nil {
 			return err
 		}
