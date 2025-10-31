@@ -74,13 +74,10 @@ func (e ErrorHandlerFunc) ServeError(w http.ResponseWriter, r *http.Request, err
 func defaultErrorHandler() ErrorHandler {
 	fn := func(w http.ResponseWriter, r *http.Request, err error) {
 		httpErr, isHTTPErr := err.(*HTTPError)
-		msg := err.Error()
-		code := http.StatusInternalServerError
-		if isHTTPErr {
-			msg = httpErr.Msg
-			code = httpErr.StatusCode
+		if !isHTTPErr {
+			httpErr = NewHTTPError(http.StatusInternalServerError, "internal error: %v", err.Error())
 		}
-		http.Error(w, msg, code)
+		encode(w, r, httpErr.StatusCode, &httpErr)
 	}
 	return ErrorHandlerFunc(fn)
 }

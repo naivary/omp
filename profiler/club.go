@@ -20,6 +20,9 @@ type ClubProfiler interface {
 	Read(ctx context.Context, id int64) (*clubv1.Profile, error)
 	// Retrieve all profiles
 	All(ctx context.Context) ([]*clubv1.Profile, error)
+
+	// Non-nil error means the user does not exist
+	IsExisting(ctx context.Context, id int64) bool
 }
 
 var _ ClubProfiler = (*clubProfiler)(nil)
@@ -42,8 +45,8 @@ func (c *clubProfiler) Create(ctx context.Context, profile *clubv1.Profile) (int
 		return 0, err
 	}
 	_, err = tx.Exec(ctx,
-		`INSERT INTO club_profile(name, location, timezone) VALUES ($1, $2, $3)`,
-		profile.Name, profile.Location, profile.Timezone,
+		`INSERT INTO club_profile(name, email, location, timezone) VALUES ($1, $2, $3)`,
+		profile.Name, profile.Email, profile.Location, profile.Timezone,
 	)
 	if err != nil {
 		return 0, err
@@ -115,4 +118,9 @@ func (c *clubProfiler) All(ctx context.Context) ([]*clubv1.Profile, error) {
 		profiles = append(profiles, &profile)
 	}
 	return profiles, nil
+}
+
+func (c *clubProfiler) IsExisting(ctx context.Context, id int64) bool {
+	_, err := c.Read(ctx, id)
+	return err == nil
 }

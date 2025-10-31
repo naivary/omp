@@ -2,6 +2,7 @@ package v1
 
 type Profile struct {
 	ID       int64  `json:"id"`
+	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Location string `json:"location"`
 	Timezone string `json:"timezone"`

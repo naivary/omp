@@ -31,6 +31,14 @@ func InsertRandTestdata(ctx context.Context, pool *pgxpool.Pool) error {
 			'America/New_York','America/Los_Angeles','Europe/London','Europe/Berlin',
 			'Asia/Tokyo','Asia/Dubai','Africa/Lagos','America/Sao_Paulo'
 		 ])[1 + floor(random() * 8)::int] AS timezone
+		lower(
+			(ARRAY['alex','jordan','taylor','morgan','riley','casey','jamie','avery','skyler','quinn'])
+			[1 + floor(random() * 10)::int]
+			|| '.' ||
+			(ARRAY['smith','johnson','williams','brown','jones','garcia','miller','davis','martinez','lopez'])
+			[1 + floor(random() * 10)::int]
+			|| '_' || t.id || '_' || gs || '@omptest.com'
+		) AS email,
 	FROM generate_series(1, 100) AS g;
 
 	-- Insert 10 Teams per Club (1,000 total)
@@ -53,7 +61,7 @@ func InsertRandTestdata(ctx context.Context, pool *pgxpool.Pool) error {
 			|| '.' ||
 			(ARRAY['smith','johnson','williams','brown','jones','garcia','miller','davis','martinez','lopez'])
 			[1 + floor(random() * 10)::int]
-			|| '_' || t.id || '_' || gs || '@example.com'
+			|| '_' || t.id || '_' || gs || '@omptest.com'
 		) AS email,
 		(ARRAY['Alex','Jordan','Taylor','Morgan','Riley','Casey','Jamie','Avery','Skyler','Quinn'])
 			[1 + floor(random() * 10)::int] AS first_name,

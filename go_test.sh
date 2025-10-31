@@ -4,7 +4,6 @@
 
 go_test_verbose=0
 
-
 err() {
   echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
 }
@@ -50,7 +49,7 @@ function main() {
 
     log "Run tests..."
 
-    if [ go_test_verbose ]; then
+    if [[ "$go_test_verbose" -eq 1 ]]; then
         go test ./... -v
         return
     fi

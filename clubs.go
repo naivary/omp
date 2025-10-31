@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -125,6 +126,11 @@ func deleteClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 		c, err := decode[clubv1.DeleteClubRequest](r)
 		if err != nil {
 			return err
+		}
+		isExisting := p.IsExisting(ctx, c.ClubID)
+		if !isExisting {
+			fmt.Println("###################### IM HERE")
+			return NewHTTPError(http.StatusBadRequest, "club does not exist: %d", c.ClubID)
 		}
 		err = p.Remove(ctx, c.ClubID)
 		if err != nil {

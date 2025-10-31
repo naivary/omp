@@ -30,6 +30,7 @@ func provisionStatementV1() *provisionStatement {
 		CREATE TABLE IF NOT EXISTS club_profile(
 			id bigint PRIMARY KEY DEFAULT pseudo_encrypt(nextval('id_seq')),
 			name text NOT NULL UNIQUE,
+			email text NOT NULL UNIQUE,
 			location text NOT NULL,
 			timezone text NOT NULL
 		);
