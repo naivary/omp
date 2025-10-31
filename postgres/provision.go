@@ -39,7 +39,7 @@ type provisionStatement struct {
 // acquireAdvisoryLock acquires an advisory lock at transaction level for a
 // given reason.
 func acquireAdvisoryLock(ctx context.Context, tx pgx.Tx, reason int) error {
-	_, err := tx.Exec(ctx, "SELECT pg_advisory_lock($1)", reason)
+	_, err := tx.Exec(ctx, "SELECT pg_try_advisory_xact_lock($1)", reason)
 	return err
 }
 
