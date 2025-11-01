@@ -1,6 +1,10 @@
 package openapi
 
-import "reflect"
+import (
+	"reflect"
+
+	"github.com/google/jsonschema-go/jsonschema"
+)
 
 type RequestBody struct {
 	Description string                `json:"description,omitempty"`
@@ -10,10 +14,10 @@ type RequestBody struct {
 
 func NewReqBody[T any](desc string, required bool) *RequestBody {
 	var model T
-	var s *Schema
+	var s *jsonschema.Schema
 	typ := reflect.TypeOf(model)
 	if typ != nil {
-		s = &Schema{Ref: componentRef("schemas", typ.Name())}
+		s = &jsonschema.Schema{Ref: componentRef("schemas", typ.Name())}
 	}
 	req := &RequestBody{
 		Description: desc,

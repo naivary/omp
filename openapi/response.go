@@ -1,6 +1,10 @@
 package openapi
 
-import "reflect"
+import (
+	"reflect"
+
+	"github.com/google/jsonschema-go/jsonschema"
+)
 
 type Response struct {
 	Ref         string                `json:"$ref,omitempty"`
@@ -17,10 +21,10 @@ func NewResRef(ref string) *Response {
 
 func NewResponse[T any](desc string) *Response {
 	var model T
-	var s *Schema
+	var s *jsonschema.Schema
 	typ := reflect.TypeOf(model)
 	if typ != nil {
-		s = &Schema{Ref: componentRef("schemas", typeName(model))}
+		s = &jsonschema.Schema{Ref: componentRef("schemas", typeName(model))}
 	}
 	res := &Response{
 		Description: desc,

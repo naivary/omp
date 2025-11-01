@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/iancoleman/strcase"
 
 	"github.com/naivary/omp/openapi"
@@ -69,12 +70,12 @@ func buildOperation(endpoint *Endpoint) (*openapi.Operation, error) {
 	return op, nil
 }
 
-func schemaDefs() (map[string]*openapi.Schema, error) {
+func schemaDefs() (map[string]*jsonschema.Schema, error) {
 	entries, err := os.ReadDir("api/openapi/schemas")
 	if err != nil {
 		return nil, err
 	}
-	schemas := make(map[string]*openapi.Schema)
+	schemas := make(map[string]*jsonschema.Schema)
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -82,7 +83,7 @@ func schemaDefs() (map[string]*openapi.Schema, error) {
 		filename := entry.Name()
 		ref := fmt.Sprintf("./schemas/%s", filename)
 		typeName := strcase.ToCamel(strings.Split(filename, ".")[0])
-		schemas[typeName] = &openapi.Schema{Ref: ref}
+		schemas[typeName] = &jsonschema.Schema{Ref: ref}
 	}
 	return schemas, nil
 }

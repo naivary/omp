@@ -1,5 +1,7 @@
 package openapi
 
+import "github.com/google/jsonschema-go/jsonschema"
+
 type SecurityType int
 
 const (
@@ -43,7 +45,7 @@ func New(openAPIVersion, contactName, email string, license LicenseKeyword) *Ope
 		Info:    newInfo(contactName, email, license),
 		Paths:   make(map[string]*PathItem),
 		Components: &Components{
-			Schemas:         make(map[string]*Schema),
+			Schemas:         make(map[string]*jsonschema.Schema),
 			Responses:       make(map[string]*Response),
 			Parameters:      make(map[string]*Parameter),
 			Examples:        make(map[string]*Example),
@@ -102,8 +104,8 @@ type Example struct {
 }
 
 type MediaType struct {
-	Schema         *Schema              `json:"schema,omitempty,omitzero"`
-	ItemSchema     *Schema              `json:"itemSchema,omitempty"`
+	Schema         *jsonschema.Schema   `json:"schema,omitempty,omitzero"`
+	ItemSchema     *jsonschema.Schema   `json:"itemSchema,omitempty"`
 	Example        any                  `json:"example,omitempty"`
 	Examples       map[string]*Example  `json:"examples,omitempty"`
 	Encoding       map[string]*Encoding `json:"encoding,omitempty"`
@@ -140,17 +142,17 @@ type Tag struct {
 }
 
 type Components struct {
-	Schemas         map[string]*Schema         `json:"schemas,omitempty"`
-	Responses       map[string]*Response       `json:"responses,omitempty"`
-	Parameters      map[string]*Parameter      `json:"parameters,omitempty"`
-	Examples        map[string]*Example        `json:"examples,omitempty"`
-	RequestBodies   map[string]*RequestBody    `json:"requestBodies,omitempty"`
-	Headers         map[string]*Header         `json:"headers,omitempty"`
-	SecuritySchemas map[string]*SecurityScheme `json:"securitySchemes,omitempty"`
-	Links           map[string]*Link           `json:"links,omitempty"`
-	Callbacks       map[string]*PathItem       `json:"callbacks,omitempty"`
-	PathItems       map[string]*PathItem       `json:"pathItems,omitempty"`
-	MediaTypes      map[string]*MediaType      `json:"mediaTypes,omitempty"`
+	Schemas         map[string]*jsonschema.Schema `json:"schemas,omitempty"`
+	Responses       map[string]*Response          `json:"responses,omitempty"`
+	Parameters      map[string]*Parameter         `json:"parameters,omitempty"`
+	Examples        map[string]*Example           `json:"examples,omitempty"`
+	RequestBodies   map[string]*RequestBody       `json:"requestBodies,omitempty"`
+	Headers         map[string]*Header            `json:"headers,omitempty"`
+	SecuritySchemas map[string]*SecurityScheme    `json:"securitySchemes,omitempty"`
+	Links           map[string]*Link              `json:"links,omitempty"`
+	Callbacks       map[string]*PathItem          `json:"callbacks,omitempty"`
+	PathItems       map[string]*PathItem          `json:"pathItems,omitempty"`
+	MediaTypes      map[string]*MediaType         `json:"mediaTypes,omitempty"`
 }
 
 type SecurityScheme struct {

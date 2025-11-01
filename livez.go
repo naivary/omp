@@ -2,8 +2,15 @@ package main
 
 import "net/http"
 
-func Livez() http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) error {
+func Livez() *Endpoint {
+	return &Endpoint{
+		Handler: livez(),
+		Error:   defaultErrorHandler(),
+	}
+}
+
+func livez() HandlerFuncErr {
+	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
 		if ctx.Err() != nil {
 			return ErrServerShutdown
@@ -11,6 +18,5 @@ func Livez() http.Handler {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 		return nil
-	}
-	return HandlerFuncErr(fn)
+	})
 }

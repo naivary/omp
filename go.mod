@@ -3,6 +3,7 @@ module github.com/naivary/omp
 go 1.24.0
 
 require (
+	github.com/google/jsonschema-go v0.3.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/jackc/pgx/v5 v5.7.6
 	golang.org/x/oauth2 v0.28.0
@@ -16,7 +17,6 @@ require (
 	github.com/abice/go-enum v0.9.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/golang/mock v1.6.0 // indirect
-	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
