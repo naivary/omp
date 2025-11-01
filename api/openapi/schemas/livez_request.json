@@ -1,0 +1,1 @@
+{"$id":"https://raw.githubusercontent.com/naivary/omp/refs/heads/main/api/openapi/schemas/livez_request.json","$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","title":"livez request model","properties":{"verbose":{"type":"integer"}}}

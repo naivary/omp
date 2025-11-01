@@ -5,7 +5,7 @@ import (
 	"github.com/google/jsonschema-go/jsonschema"
 )
 
-// ENUM(Path, Query, Header, Cookie)
+// ENUM(path, query, header, cookie)
 type ParamIn int
 
 type Parameter struct {
@@ -40,7 +40,7 @@ func NewQueryParam[T any](name, desc string, required bool) *Parameter {
 	return param
 }
 
-func NewCookieParam[T any](name, desc string, required bool, s *Schema) *Parameter {
+func NewCookieParam[T any](name, desc string, required bool) *Parameter {
 	schema, err := jsonschema.For[T](nil)
 	if err != nil {
 		panic(err)
@@ -55,7 +55,7 @@ func NewCookieParam[T any](name, desc string, required bool, s *Schema) *Paramet
 	return param
 }
 
-func NewHeaderParam[T any](name, desc string, required bool, s *Schema) *Parameter {
+func NewHeaderParam[T any](name, desc string, required bool) *Parameter {
 	schema, err := jsonschema.For[T](nil)
 	if err != nil {
 		panic(err)

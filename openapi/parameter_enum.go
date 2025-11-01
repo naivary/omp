@@ -19,7 +19,7 @@ const (
 
 var ErrInvalidParamIn = errors.New("not a valid ParamIn")
 
-const _ParamInName = "PathQueryHeaderCookie"
+const _ParamInName = "pathqueryheadercookie"
 
 var _ParamInMap = map[ParamIn]string{
 	ParamInPath:   _ParamInName[0:4],

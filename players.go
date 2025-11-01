@@ -19,7 +19,7 @@ func CreatePlayerProfile(kc keycloak.Keycloak, playerProfiler profiler.PlayerPro
 		OperationID: "createPlayerProfile",
 		RequestBody: openapi.NewReqBody[playerv1.CreatePlayerRequest]("", true),
 		Responses: map[string]*openapi.Response{
-			"200": openapi.NewResponse[playerv1.CreatePlayerResponse](""),
+			"200": openapi.NewResponse[playerv1.CreatePlayerResponse]("Player Profile created successfully"),
 		},
 	}
 }

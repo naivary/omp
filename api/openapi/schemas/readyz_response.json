@@ -1,0 +1,1 @@
+{"$id":"https://raw.githubusercontent.com/naivary/omp/refs/heads/main/api/openapi/schemas/readyz_response.json","$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","title":"readyz response","properties":{"status":{"type":"string"}}}

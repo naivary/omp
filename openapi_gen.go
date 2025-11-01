@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/google/jsonschema-go/jsonschema"
-	"github.com/iancoleman/strcase"
 
 	"github.com/naivary/omp/openapi"
 )
@@ -81,9 +80,27 @@ func schemaDefs() (map[string]*jsonschema.Schema, error) {
 			continue
 		}
 		filename := entry.Name()
-		ref := fmt.Sprintf("./schemas/%s", filename)
-		typeName := strcase.ToCamel(strings.Split(filename, ".")[0])
+		ref := fmt.Sprintf("https://raw.githubusercontent.com/naivary/omp/refs/heads/main/api/openapi/schemas/%s", filename)
+		typeName := schemaTypeName(filename)
 		schemas[typeName] = &jsonschema.Schema{Ref: ref}
 	}
 	return schemas, nil
+}
+
+func schemaTypeName(filename string) string {
+	acronyms := map[string]string{
+		"http": "HTTP",
+	}
+	filenameWithoutExt := strings.Split(filename, ".")[0]
+	filenameSegments := strings.Split(filenameWithoutExt, "_")
+	for i, filenameSegment := range filenameSegments {
+		acronym, ok := acronyms[filenameSegment]
+		if ok {
+			filenameSegments[i] = acronym
+			continue
+		}
+		firstLetter := string(filenameSegment[0])
+		filenameSegments[i] = fmt.Sprintf("%s%s", strings.ToTitle(firstLetter), filenameSegment[1:])
+	}
+	return strings.Join(filenameSegments, "")
 }
