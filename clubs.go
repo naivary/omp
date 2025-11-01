@@ -186,14 +186,21 @@ func deleteClubProfile(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFun
 	})
 }
 
-func ReadAllClubs(p profiler.ClubProfiler) *Endpoint {
+func ReadAllClubProfiles(p profiler.ClubProfiler) *Endpoint {
 	return &Endpoint{
-		Handler: readAllClubs(p),
-		Error:   defaultErrorHandler(),
+		Handler:     readAllClubProfiles(p),
+		Error:       defaultErrorHandler(),
+		Pattern:     "GET /clubs",
+		Summary:     "Get all available club profiles",
+		Tags:        openapi.Tags("ClubProfile"),
+		OperationID: "readAllClubProfiles",
+		Responses: map[string]*openapi.Response{
+			"200": openapi.NewResponse[](),
+		},
 	}
 }
 
-func readAllClubs(p profiler.ClubProfiler) HandlerFuncErr {
+func readAllClubProfiles(p profiler.ClubProfiler) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
 		profiles, err := p.All(ctx)
