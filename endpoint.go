@@ -20,7 +20,7 @@ type Endpoint struct {
 	// Error is the handler used if the returned error of the Handler is
 	// non-nil.
 	Error ErrorHandler
-
+	// Pattern of the endpoint e.g. METHOD /path/to/Endpoint
 	Pattern string
 	// Summary included in the OpenAPI spec.
 	Summary string
@@ -34,14 +34,12 @@ type Endpoint struct {
 	OperationID string
 	// Deprecated flags an endpoint as deprecated in the OpenAPI documentation.
 	Deprecated bool
-
 	// Parameters defines teh required and optional parameters for this
 	// endpoint. Parameters might be in Cookies, Headers, Queries and Path. Path
 	// parameters cannot be generated automatically without breaking the
 	// standard patter notation of the http package. Thats why you have to
 	// define them by yourself using the helper functions.
 	Parameters []*openapi.Parameter
-
 	// RequestBody of the Endpoint.
 	RequestBody *openapi.RequestBody
 	Responses   map[string]*openapi.Response

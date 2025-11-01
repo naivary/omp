@@ -11,6 +11,8 @@ import (
 	"github.com/naivary/omp/openapi"
 )
 
+const _schemaBaseURL = "https://raw.githubusercontent.com/naivary/omp/refs/heads/main/api/openapi/schemas"
+
 func GenOpenAPISpecs(root *openapi.OpenAPI, endpoints ...*Endpoint) error {
 	if root.Info == nil {
 		return fmt.Errorf("nil info: OpenAPI.Info is required")
@@ -80,7 +82,7 @@ func schemaDefs() (map[string]*jsonschema.Schema, error) {
 			continue
 		}
 		filename := entry.Name()
-		ref := fmt.Sprintf("https://raw.githubusercontent.com/naivary/omp/refs/heads/main/api/openapi/schemas/%s", filename)
+		ref := fmt.Sprintf("%s/%s", _schemaBaseURL, filename)
 		typeName := schemaTypeName(filename)
 		schemas[typeName] = &jsonschema.Schema{Ref: ref}
 	}
