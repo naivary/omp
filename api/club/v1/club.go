@@ -52,3 +52,12 @@ type UpdateClubRequest struct {
 	// +openapi:schema:minLength=1
 	Timezone string `json:"timezone"`
 }
+
+// +openapi:schema:title="read club profile response"
+type ReadClubProfileResponse struct {
+	ID       int64  `json:"id"`
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Location string `json:"location"`
+	Timezone string `json:"timezone"`
+}

@@ -6,17 +6,27 @@ import (
 
 	clubv1 "github.com/naivary/omp/api/club/v1"
 	"github.com/naivary/omp/keycloak"
+	"github.com/naivary/omp/openapi"
 	"github.com/naivary/omp/profiler"
 )
 
-func CreateClub(kc keycloak.Keycloak, p profiler.ClubProfiler) *Endpoint {
+func CreateClubProfile(kc keycloak.Keycloak, p profiler.ClubProfiler) *Endpoint {
 	return &Endpoint{
-		Handler: createClub(kc, p),
-		Error:   defaultErrorHandler(),
+		Handler:     createClubProfile(kc, p),
+		Error:       defaultErrorHandler(),
+		Pattern:     "POST /clubs",
+		Summary:     "Create a new club profile",
+		Tags:        openapi.Tags("ClubProfile"),
+		OperationID: "createClubProfile",
+		RequestBody: openapi.NewReqBody[clubv1.CreateClubRequest]("create a new club profile", true),
+		Responses: map[string]*openapi.Response{
+			"201": openapi.NewResponse[clubv1.CreateClubResponse]("successfull response for a created club profile"),
+			"400": openapi.NewResponse[HTTPError]("user with the email already exists"),
+		},
 	}
 }
 
-func createClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
+func createClubProfile(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
 		c, err := decode[clubv1.CreateClubRequest](r)
@@ -58,14 +68,24 @@ func createClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 	})
 }
 
-func ReadClub(p profiler.ClubProfiler) *Endpoint {
+func ReadClubProfile(p profiler.ClubProfiler) *Endpoint {
 	return &Endpoint{
-		Handler: readClub(p),
-		Error:   defaultErrorHandler(),
+		Handler:     readClubProfile(p),
+		Error:       defaultErrorHandler(),
+		Pattern:     "GET /clubs/{id}",
+		Summary:     "read a single club profile based on the id",
+		Tags:        openapi.Tags("ClubProfile"),
+		OperationID: "readClubProfile",
+		Responses: map[string]*openapi.Response{
+			"201": openapi.NewResponse[clubv1.ReadClubProfileResponse]("successfull response"),
+		},
+		Parameters: []*openapi.Parameter{
+			openapi.NewPathParam[int]("id"),
+		},
 	}
 }
 
-func readClub(p profiler.ClubProfiler) HandlerFuncErr {
+func readClubProfile(p profiler.ClubProfiler) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
@@ -80,14 +100,25 @@ func readClub(p profiler.ClubProfiler) HandlerFuncErr {
 	})
 }
 
-func UpdateClub(p profiler.ClubProfiler) *Endpoint {
+func UpdateClubProfile(p profiler.ClubProfiler) *Endpoint {
 	return &Endpoint{
-		Handler: updateClub(p),
-		Error:   defaultErrorHandler(),
+		Handler:     updateClubProfile(p),
+		Error:       defaultErrorHandler(),
+		Pattern:     "PATCH /clubs",
+		Summary:     "update a club profile partially or completly",
+		Tags:        openapi.Tags("ClubProfile"),
+		OperationID: "updateClubProfile",
+		RequestBody: openapi.NewReqBody[clubv1.UpdateClubRequest]("update a club profile", true),
+		Responses: map[string]*openapi.Response{
+			"204": {Description: "successfull response"},
+		},
+		Parameters: []*openapi.Parameter{
+			openapi.NewPathParam[int]("id"),
+		},
 	}
 }
 
-func updateClub(p profiler.ClubProfiler) HandlerFuncErr {
+func updateClubProfile(p profiler.ClubProfiler) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
@@ -113,14 +144,22 @@ func updateClub(p profiler.ClubProfiler) HandlerFuncErr {
 	})
 }
 
-func DeleteClub(kc keycloak.Keycloak, p profiler.ClubProfiler) *Endpoint {
+func DeleteClubProfile(kc keycloak.Keycloak, p profiler.ClubProfiler) *Endpoint {
 	return &Endpoint{
-		Handler: deleteClub(kc, p),
-		Error:   defaultErrorHandler(),
+		Handler:     deleteClubProfile(kc, p),
+		Error:       defaultErrorHandler(),
+		Pattern:     "DELETE /clubs/{id}",
+		Summary:     "delete a club profile. This operation will be cascading and delete all entities related to this club profile.",
+		Tags:        openapi.Tags("ClubProfile"),
+		OperationID: "deleteClubProfile",
+		RequestBody: openapi.NewReqBody[clubv1.DeleteClubRequest]("delete club profile and root user", true),
+		Responses: map[string]*openapi.Response{
+			"204": {Description: "Club Profile deleted successfully"},
+		},
 	}
 }
 
-func deleteClub(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
+func deleteClubProfile(kc keycloak.Keycloak, p profiler.ClubProfiler) HandlerFuncErr {
 	return HandlerFuncErr(func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
