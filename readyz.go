@@ -25,7 +25,7 @@ func Readyz() *Endpoint {
 		},
 		Responses: map[string]*openapi.Response{
 			"200": openapi.NewResponse[system.ReadyzResponse]("API is ready and can accept requests"),
-			"503": openapi.NewResponse[HTTPError]("service is unavailable"),
+			"503": openapi.NewResponse[HTTPError]("Service is unavailable"),
 		},
 	}
 }

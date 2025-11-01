@@ -13,3 +13,5 @@ the prefered approach because it is officially supported by keycloak.
    code?
 2. REST Client should be generate from the openapi specs which then can be used
    by the tests to communicate with the server in a standard way
+3. Make the openapi SCHEMA as simple as posisble for the use case of this
+   applciation. and make it more complex if needed
